@@ -1,0 +1,74 @@
+# ==============================================================
+#  NTUT Unity 期末專題 — workspace .gitignore
+#  Unity 專案位於 unity-app/,以下規則改用 GitHub 官方 Unity 範本,
+#  並以 unity-app/ 前綴錨定(來源:github.com/github/gitignore/blob/main/Unity.gitignore)
+# ==============================================================
+
+# ---- OS / 編輯器雜項 ----
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+desktop.ini
+.idea/
+.vscode/
+
+# ---- Claude Code 本機設定(個人,不入庫)----
+.claude/settings.local.json
+
+# ---- Unity 自動產生的資料夾(unity-app/)----
+unity-app/[Ll]ibrary/
+unity-app/[Tt]emp/
+unity-app/[Oo]bj/
+unity-app/[Bb]uild/
+unity-app/[Bb]uilds/
+unity-app/[Ll]ogs/
+unity-app/[Uu]ser[Ss]ettings/
+unity-app/[Mm]emoryCaptures/
+unity-app/[Rr]ecordings/
+
+# ---- Unity 自動產生的 IDE / 方案檔 ----
+unity-app/.vs/
+unity-app/.gradle/
+unity-app/ExportedObj/
+unity-app/*.csproj
+unity-app/*.unityproj
+unity-app/*.sln
+unity-app/*.suo
+unity-app/*.tmp
+unity-app/*.user
+unity-app/*.userprefs
+unity-app/*.pidb
+unity-app/*.booproj
+unity-app/*.svd
+unity-app/*.pdb
+unity-app/*.mdb
+unity-app/*.opendb
+unity-app/*.VC.db
+unity-app/[Aa]ssets/Plugins/Editor/JetBrains*
+
+# ---- Unity 崩潰報告 / meta 雜項 ----
+unity-app/sysinfo.txt
+unity-app/*.pidb.meta
+unity-app/*.pdb.meta
+unity-app/*.mdb.meta
+
+# ---- 建置產物 ----
+unity-app/*.apk
+unity-app/*.aab
+unity-app/*.unitypackage
+unity-app/*.app
+unity-app/crashlytics-build.properties
+
+# ---- Addressables / StreamingAssets 自動產生 ----
+unity-app/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
+unity-app/[Aa]ssets/[Ss]treamingAssets/aa.meta
+unity-app/[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# ==============================================================
+#  ⚠️ Unity 的 .meta 檔「必須」commit,絕對不要忽略!
+#  ⚠️ 二進位大型素材建議用 Git LFS 管理(見 README「版本控制」段)
+# ==============================================================
