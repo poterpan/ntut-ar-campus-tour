@@ -11,12 +11,12 @@ namespace NtutAR.Geo
     /// <summary>
     /// W1 工具:走到 POI 旁邊、等 VPS lock 後按 Save,自動把 lat/lng/精度寫進 JSON。
     /// 檔案存在 Application.persistentDataPath/poi_captures.json,
-    /// 用 Xcode Devices 視窗或 iOS Files App 拉回 Mac;Show JSON 也會複製到剪貼簿。
+    /// 開啟 File Sharing 後(見 POIBuildPostProcess.cs)可在 Files App 內找到並 AirDrop。
+    /// 另外「📋 複製 JSON」按鈕會把 JSON 同步到剪貼簿。
     ///
-    /// 會在 Awake 接管 sample 端:
+    /// 接管 sample 端:
     /// - GeospatialController.DisableAnchorCreation = true(取消 tap-to-anchor)
-    /// - 隱藏 "TapScreenMessage" 與 "SnackBar" GameObjects(底部的提示文字)
-    /// - UI 自己貼在螢幕底部 Safe Area,避開動態島跟 sample 頂部資訊欄
+    /// - 隱藏 "TapScreenMessage" / "SnackBar"(底部 tutorial 提示)
     /// </summary>
     public class POICollector : MonoBehaviour
     {
@@ -28,8 +28,12 @@ namespace NtutAR.Geo
         private string _nameInput = "POI 01";
         private string _statusText = "等 VPS lock...";
         private Vector2 _listScroll;
-        private bool _showJson;
         private string _jsonForCopy = string.Empty;
+
+        // 互動狀態
+        private bool _clearArmed;
+        private float _clearArmedUntil;
+        private float _copyFeedbackUntil;
 
         [Serializable]
         public struct POIRecord
@@ -67,7 +71,6 @@ namespace NtutAR.Geo
                 Controller.DisableAnchorCreation = true;
             }
 
-            // 隱藏 sample 內建的提示文字(POI Collector 模式不需要)
             DisableGameObjectByName("TapScreenMessage");
             DisableGameObjectByName("SnackBar");
 
@@ -108,6 +111,11 @@ namespace NtutAR.Geo
                 var em = EarthManager == null ? "no manager" : EarthManager.EarthState.ToString();
                 _statusText = $"⏳ 等 VPS lock... ({em})";
             }
+
+            if (_clearArmed && Time.time > _clearArmedUntil)
+            {
+                _clearArmed = false;
+            }
         }
 
         private void OnGUI()
@@ -115,17 +123,20 @@ namespace NtutAR.Geo
             var safe = Screen.safeArea;
             const float pad = 16f;
             var width = safe.width - 2 * pad;
-            var height = Mathf.Min(660f, safe.height - 60f);
+            var height = Mathf.Min(900f, safe.height - 60f);
             var x = safe.x + pad;
-            // OnGUI 用 top-left origin;safe.y 是 bottom-left origin 的下緣
             var y = Screen.height - safe.y - height - pad;
 
-            // 觸控友善的字級(配合手指大小放大)
             GUI.skin.label.fontSize = 22;
             GUI.skin.button.fontSize = 28;
             GUI.skin.textField.fontSize = 26;
-            GUI.skin.textArea.fontSize = 14;
+            GUI.skin.textArea.fontSize = 16;
             GUI.skin.box.fontSize = 22;
+            // 放大 scrollbar 觸控好按
+            GUI.skin.verticalScrollbar.fixedWidth = 36;
+            GUI.skin.verticalScrollbarThumb.fixedWidth = 36;
+
+            var origColor = GUI.color;
 
             GUILayout.BeginArea(new Rect(x, y, width, height), GUI.skin.box);
             GUILayout.Label("POI Collector", GUI.skin.box);
@@ -136,7 +147,6 @@ namespace NtutAR.Geo
             _nameInput = GUILayout.TextField(_nameInput, GUILayout.Height(56));
 
             var canSave = TryGetPose(out _);
-            var origColor = GUI.color;
             GUI.color = canSave ? Color.green : Color.gray;
             if (GUILayout.Button(canSave ? "Save POI" : "等待 VPS lock...", GUILayout.Height(88)))
             {
@@ -147,29 +157,74 @@ namespace NtutAR.Geo
             GUILayout.Space(6);
             GUILayout.Label($"已存 {_records.Count} 個 POI");
 
-            _listScroll = GUILayout.BeginScrollView(_listScroll, GUILayout.Height(180));
-            foreach (var r in _records)
+            _listScroll = GUILayout.BeginScrollView(_listScroll, GUILayout.Height(280));
+            int? deleteIdx = null;
+            for (int i = 0; i < _records.Count; i++)
             {
+                var r = _records[i];
+                GUILayout.BeginHorizontal();
                 GUILayout.Label(
                     $"{r.id} {r.name}\n  {r.lat:F6}, {r.lng:F6}  (H {r.horizontalAccuracy:F2}m / Y {r.headingAccuracy:F2}°)");
+                if (GUILayout.Button("✕", GUILayout.Width(72), GUILayout.Height(72)))
+                {
+                    deleteIdx = i;
+                }
+                GUILayout.EndHorizontal();
+                GUILayout.Space(2);
             }
             GUILayout.EndScrollView();
 
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Show JSON", GUILayout.Height(64)))
+            if (deleteIdx.HasValue)
             {
-                ShowJson();
+                _records.RemoveAt(deleteIdx.Value);
+                SaveRecords();
             }
-            if (GUILayout.Button("關閉", GUILayout.Height(64), GUILayout.Width(140)))
-            {
-                _showJson = false;
-            }
-            GUILayout.EndHorizontal();
 
-            if (_showJson)
+            // Clear All(2-tap 確認)
+            if (_records.Count > 0)
             {
-                GUILayout.TextArea(_jsonForCopy, GUILayout.Height(100));
+                GUI.color = _clearArmed ? new Color(1f, 0.3f, 0.3f) : new Color(1f, 0.85f, 0.7f);
+                var clearText = _clearArmed
+                    ? $"⚠ 再按一次清空 {_records.Count} 個!"
+                    : $"🗑 清空全部 ({_records.Count})";
+                if (GUILayout.Button(clearText, GUILayout.Height(56)))
+                {
+                    if (_clearArmed)
+                    {
+                        _records.Clear();
+                        SaveRecords();
+                        _clearArmed = false;
+                    }
+                    else
+                    {
+                        _clearArmed = true;
+                        _clearArmedUntil = Time.time + 3f;
+                    }
+                }
+                GUI.color = origColor;
             }
+
+            // 複製 JSON 到剪貼簿
+            GUI.color = new Color(0.7f, 0.85f, 1f);
+            if (GUILayout.Button("📋 複製 JSON 到剪貼簿", GUILayout.Height(64)))
+            {
+                CopyJsonToClipboard();
+            }
+            GUI.color = origColor;
+
+            if (Time.time < _copyFeedbackUntil)
+            {
+                var ok = new GUIStyle(GUI.skin.label);
+                ok.normal.textColor = new Color(0.2f, 0.9f, 0.3f);
+                ok.wordWrap = true;
+                GUILayout.Label($"✓ 已複製 {_jsonForCopy.Length} 字元!可貼到 Notes / Mail", ok);
+            }
+
+            // 提示:檔案存哪 + Files App 路徑
+            var hint = new GUIStyle(GUI.skin.label);
+            hint.fontSize = 14;
+            hint.wordWrap = true;
+            GUILayout.Label("Files App → 瀏覽 → 我的 iPhone → unity-app → poi_captures.json (可長按 AirDrop)", hint);
 
             GUILayout.EndArea();
         }
@@ -196,13 +251,13 @@ namespace NtutAR.Geo
             Debug.Log($"[POICollector] Saved {rec.id} {rec.name}: {rec.lat:F6}, {rec.lng:F6}");
         }
 
-        private void ShowJson()
+        private void CopyJsonToClipboard()
         {
             var list = new POIRecordList { captures = _records };
             _jsonForCopy = JsonUtility.ToJson(list, true);
-            _showJson = true;
             GUIUtility.systemCopyBuffer = _jsonForCopy;
-            Debug.Log($"[POICollector] JSON copied to clipboard ({_jsonForCopy.Length} chars)");
+            _copyFeedbackUntil = Time.time + 3f;
+            Debug.Log($"[POICollector] JSON copied ({_jsonForCopy.Length} chars)");
         }
 
         private void SaveRecords()
