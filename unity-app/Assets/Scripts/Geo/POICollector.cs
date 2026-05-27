@@ -14,7 +14,8 @@ namespace NtutAR.Geo
     /// 用 Xcode Devices 視窗或 iOS Files App 拉回 Mac;Show JSON 也會複製到剪貼簿。
     ///
     /// 會在 Awake 接管 sample 端:
-    /// - 把 GeospatialController.DisableAnchorCreation 設為 true(取消 tap-to-anchor)
+    /// - GeospatialController.DisableAnchorCreation = true(取消 tap-to-anchor)
+    /// - 隱藏 "TapScreenMessage" 與 "SnackBar" GameObjects(底部的提示文字)
     /// - UI 自己貼在螢幕底部 Safe Area,避開動態島跟 sample 頂部資訊欄
     /// </summary>
     public class POICollector : MonoBehaviour
@@ -55,17 +56,35 @@ namespace NtutAR.Geo
             _savePath = Path.Combine(Application.persistentDataPath, "poi_captures.json");
             if (EarthManager == null)
             {
-                EarthManager = FindObjectOfType<AREarthManager>();
+                EarthManager = FindFirstObjectByType<AREarthManager>();
             }
             if (Controller == null)
             {
-                Controller = FindObjectOfType<GeospatialController>();
+                Controller = FindFirstObjectByType<GeospatialController>();
             }
             if (Controller != null)
             {
                 Controller.DisableAnchorCreation = true;
             }
+
+            // 隱藏 sample 內建的提示文字(POI Collector 模式不需要)
+            DisableGameObjectByName("TapScreenMessage");
+            DisableGameObjectByName("SnackBar");
+
             LoadRecords();
+        }
+
+        private void DisableGameObjectByName(string name)
+        {
+            var go = GameObject.Find(name);
+            if (go != null)
+            {
+                go.SetActive(false);
+            }
+            else
+            {
+                Debug.LogWarning($"[POICollector] Could not find GameObject '{name}'");
+            }
         }
 
         private bool TryGetPose(out GeospatialPose pose)
@@ -94,52 +113,54 @@ namespace NtutAR.Geo
         private void OnGUI()
         {
             var safe = Screen.safeArea;
-            const float pad = 12f;
+            const float pad = 16f;
             var width = safe.width - 2 * pad;
-            var height = Mathf.Min(440f, safe.height - 80f);
+            var height = Mathf.Min(660f, safe.height - 60f);
             var x = safe.x + pad;
-            // OnGUI 用 top-left origin;safe.y 是 bottom-left origin 的下緣,所以面板底邊 = Screen.height - safe.y
+            // OnGUI 用 top-left origin;safe.y 是 bottom-left origin 的下緣
             var y = Screen.height - safe.y - height - pad;
 
-            GUI.skin.label.fontSize = 16;
-            GUI.skin.button.fontSize = 20;
-            GUI.skin.textField.fontSize = 18;
-            GUI.skin.textArea.fontSize = 11;
+            // 觸控友善的字級(配合手指大小放大)
+            GUI.skin.label.fontSize = 22;
+            GUI.skin.button.fontSize = 28;
+            GUI.skin.textField.fontSize = 26;
+            GUI.skin.textArea.fontSize = 14;
+            GUI.skin.box.fontSize = 22;
 
             GUILayout.BeginArea(new Rect(x, y, width, height), GUI.skin.box);
             GUILayout.Label("POI Collector", GUI.skin.box);
             GUILayout.Label(_statusText);
-            GUILayout.Space(4);
+            GUILayout.Space(6);
 
             GUILayout.Label("POI 名稱:");
-            _nameInput = GUILayout.TextField(_nameInput, GUILayout.Height(38));
+            _nameInput = GUILayout.TextField(_nameInput, GUILayout.Height(56));
 
             var canSave = TryGetPose(out _);
             var origColor = GUI.color;
             GUI.color = canSave ? Color.green : Color.gray;
-            if (GUILayout.Button(canSave ? "Save POI" : "等待 VPS lock...", GUILayout.Height(56)))
+            if (GUILayout.Button(canSave ? "Save POI" : "等待 VPS lock...", GUILayout.Height(88)))
             {
                 if (canSave) DoSave();
             }
             GUI.color = origColor;
 
-            GUILayout.Space(4);
+            GUILayout.Space(6);
             GUILayout.Label($"已存 {_records.Count} 個 POI");
 
-            _listScroll = GUILayout.BeginScrollView(_listScroll, GUILayout.Height(140));
+            _listScroll = GUILayout.BeginScrollView(_listScroll, GUILayout.Height(180));
             foreach (var r in _records)
             {
                 GUILayout.Label(
-                    $"{r.id} {r.name}  →  {r.lat:F6}, {r.lng:F6}  (H {r.horizontalAccuracy:F2}m, Y {r.headingAccuracy:F2}°)");
+                    $"{r.id} {r.name}\n  {r.lat:F6}, {r.lng:F6}  (H {r.horizontalAccuracy:F2}m / Y {r.headingAccuracy:F2}°)");
             }
             GUILayout.EndScrollView();
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Show JSON (→ 剪貼簿)", GUILayout.Height(38)))
+            if (GUILayout.Button("Show JSON", GUILayout.Height(64)))
             {
                 ShowJson();
             }
-            if (GUILayout.Button("關閉 JSON", GUILayout.Height(38), GUILayout.Width(100)))
+            if (GUILayout.Button("關閉", GUILayout.Height(64), GUILayout.Width(140)))
             {
                 _showJson = false;
             }
@@ -147,7 +168,7 @@ namespace NtutAR.Geo
 
             if (_showJson)
             {
-                GUILayout.TextArea(_jsonForCopy, GUILayout.Height(80));
+                GUILayout.TextArea(_jsonForCopy, GUILayout.Height(100));
             }
 
             GUILayout.EndArea();
