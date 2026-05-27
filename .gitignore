@@ -30,6 +30,12 @@ unity-app/[Uu]ser[Ss]ettings/
 unity-app/[Mm]emoryCaptures/
 unity-app/[Rr]ecordings/
 
+# iOS / Android build outputs(Unity 匯出的 Xcode/Gradle 專案,~100MB+)
+unity-app/iOS-Build/
+unity-app/iOS-*/
+unity-app/Android-Build/
+unity-app/Android-*/
+
 # ---- Unity 自動產生的 IDE / 方案檔 ----
 unity-app/.vs/
 unity-app/.gradle/

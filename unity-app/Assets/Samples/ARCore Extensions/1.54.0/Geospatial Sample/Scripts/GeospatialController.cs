@@ -81,6 +81,13 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         public AREarthManager EarthManager;
 
         /// <summary>
+        /// When true, screen taps will NOT create new anchors and the in-sample
+        /// anchor-management UI will stay hidden. Used by POICollector to take
+        /// over the input/UI during POI 座標 collection.
+        /// </summary>
+        public bool DisableAnchorCreation;
+
+        /// <summary>
         /// The ARStreetscapeGeometryManager used in the sample.
         /// </summary>
         public ARStreetscapeGeometryManager StreetscapeGeometryManager;
@@ -715,14 +722,16 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
 
                 if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began
                     && !EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId)
-                    && _anchorObjects.Count < _storageLimit)
+                    && _anchorObjects.Count < _storageLimit
+                    && !DisableAnchorCreation)
                 {
                     // Set anchor on screen tap.
                     PlaceAnchorByScreenTap(Input.GetTouch(0).position);
                 }
 
-                // Hide anchor settings and toggles if the storage limit has been reached.
-                if (_anchorObjects.Count >= _storageLimit)
+                // Hide anchor settings and toggles if the storage limit has been reached
+                // or anchor creation is disabled (POICollector mode).
+                if (_anchorObjects.Count >= _storageLimit || DisableAnchorCreation)
                 {
                     AnchorSettingButton.gameObject.SetActive(false);
                     AnchorSettingPanel.gameObject.SetActive(false);
