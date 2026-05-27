@@ -37,6 +37,7 @@ unity-app/ExportedObj/
 unity-app/*.csproj
 unity-app/*.unityproj
 unity-app/*.sln
+unity-app/*.slnx
 unity-app/*.suo
 unity-app/*.tmp
 unity-app/*.user
