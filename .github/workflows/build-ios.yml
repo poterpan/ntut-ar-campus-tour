@@ -22,13 +22,20 @@ env:
 jobs:
   build:
     name: Unity iOS Build + TestFlight Upload
-    runs-on: macos-15
+    # macos-26 image 預設 Xcode 26.4.1 / iOS 26 SDK(Apple 從 2026 起強制要 iOS 26 SDK)
+    # macos-latest 目前仍指 macos-15(default Xcode 16.4),不能用
+    runs-on: macos-26
     timeout-minutes: 90
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           lfs: false
+
+      - name: Verify Xcode / SDK
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
 
       - name: Cache Unity Library
         uses: actions/cache@v4
@@ -50,7 +57,7 @@ jobs:
           targetPlatform: iOS
           buildName: unity-app
           buildsPath: build
-          versioning: Semantic
+          versioning: None  # 用 Unity Player Settings 的 bundleVersion(目前 0.1.0),不讓 game-ci 自動算 0.0.X
 
       - name: Import code-signing cert (.p12)
         uses: apple-actions/import-codesign-certs@v3
@@ -69,17 +76,53 @@ jobs:
           echo "PROFILE_UUID=$UUID" >> $GITHUB_ENV
           echo "Installed profile UUID: $UUID"
 
-      # ARCore Extensions 透過 CocoaPods 帶進 Pods_UnityFramework 等 framework,
-      # 需要在 archive 前先 pod install 才能讓 xcodebuild 找到
-      - name: CocoaPods install
+      # 把 CFBundleVersion(build number)bump 成 github.run_number,
+      # 確保每次 TestFlight 上傳的 build number 唯一(Apple 強制要求)
+      - name: Bump CFBundleVersion
+        working-directory: build/iOS/unity-app
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          echo "=== 候選 Info.plist ==="
+          find . -maxdepth 4 -name "Info.plist" 2>/dev/null
+
+          # 找主 app 的 Info.plist,排除 Pods / xcframework / UnityFramework
+          PLIST=$(find . -maxdepth 4 -name "Info.plist" \
+            -not -path "*Pods*" \
+            -not -path "*xcframework*" \
+            -not -path "*UnityFramework*" \
+            -not -path "*Frameworks*" \
+            -print 2>/dev/null | head -1)
+
+          if [ -z "$PLIST" ] || [ ! -f "$PLIST" ]; then
+            echo "::error::找不到主 app 的 Info.plist"
+            echo "=== build/iOS/unity-app 完整列表 ==="
+            ls -la
+            exit 1
+          fi
+
+          echo "Using: $PLIST"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "$PLIST"
+          echo "✓ 設定後:"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$PLIST" 2>/dev/null || echo "(無 CFBundleShortVersionString)"
+
+      # ARCore Extensions 帶 CocoaPods 依賴時要先 pod install 才能讓 xcodebuild 找到。
+      # Cloud Anchor 關掉後通常不會有 Podfile;走 .xcodeproj 路徑即可。
+      - name: CocoaPods install (if Podfile present)
         working-directory: build/iOS/unity-app
         run: |
-          if [ ! -f Podfile ]; then
-            echo "::warning::Podfile 不存在,跳過 pod install"
-            exit 0
+          if [ -f Podfile ]; then
+            echo "::notice::Podfile 偵測到,執行 pod install"
+            pod install --repo-update
+            if [ ! -d "Unity-iPhone.xcworkspace" ]; then
+              echo "::error::pod install 完成但 Unity-iPhone.xcworkspace 沒產出,build 無法繼續"
+              ls -la
+              exit 1
+            fi
+          else
+            echo "::notice::Podfile 不存在(ARCore Cloud Anchor 已關 / 套件用 SPM),跳過 pod install,改走 .xcodeproj"
           fi
-          pod install --repo-update
-          ls -la *.xcworkspace 2>/dev/null || echo "warn: 沒看到 .xcworkspace"
 
       - name: Install App Store Connect API Key
         env:
@@ -102,18 +145,27 @@ jobs:
       - name: Create ExportOptions.plist
         env:
           TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+          PROFILE_NAME: ${{ secrets.IOS_PROVISION_PROFILE_NAME }}
+          BUNDLE_ID: ${{ env.BUNDLE_ID }}
         run: |
+          # 改 manual signing + 指定我們已 install 的 profile
+          # 因為 App Manager API Key 沒權限自動拿 profile(會踩 Cloud signing permission error)
           cat > "$GITHUB_WORKSPACE/ExportOptions.plist" << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
           <dict>
               <key>method</key>
-              <string>app-store</string>
+              <string>app-store-connect</string>
               <key>teamID</key>
               <string>${TEAM_ID}</string>
               <key>signingStyle</key>
-              <string>automatic</string>
+              <string>manual</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>${BUNDLE_ID}</key>
+                  <string>${PROFILE_NAME}</string>
+              </dict>
               <key>stripSwiftSymbols</key>
               <true/>
               <key>uploadBitcode</key>
@@ -133,10 +185,20 @@ jobs:
           APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
           APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
         run: |
-          # 用 .xcworkspace(CocoaPods 整合後的工作區),而非單獨 .xcodeproj,
-          # 才能正確 link Pods_UnityFramework 等 framework
+          # 智能選 workspace / project:有 .xcworkspace 用之(CocoaPods),否則 .xcodeproj
+          if [ -d "Unity-iPhone.xcworkspace" ]; then
+            PROJECT_FLAG=("-workspace" "Unity-iPhone.xcworkspace")
+            echo "::notice::Using Unity-iPhone.xcworkspace"
+          elif [ -d "Unity-iPhone.xcodeproj" ]; then
+            PROJECT_FLAG=("-project" "Unity-iPhone.xcodeproj")
+            echo "::notice::Using Unity-iPhone.xcodeproj"
+          else
+            echo "::error::找不到 Unity-iPhone.xcworkspace 或 .xcodeproj"
+            ls -la
+            exit 1
+          fi
           # Automatic signing + API Key 驗證:子 Swift Package 不會被全域 PROVISIONING_PROFILE 誤套
-          xcodebuild -workspace Unity-iPhone.xcworkspace \
+          xcodebuild "${PROJECT_FLAG[@]}" \
             -scheme Unity-iPhone \
             -configuration Release \
             -sdk iphoneos \
@@ -150,6 +212,7 @@ jobs:
             CODE_SIGN_STYLE=Automatic
 
       - name: Export IPA
+        id: export
         env:
           APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
           APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
@@ -162,12 +225,20 @@ jobs:
             -authenticationKeyID "$APPSTORE_KEY_ID" \
             -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${APPSTORE_KEY_ID}.p8" \
             -authenticationKeyIssuerID "$APPSTORE_ISSUER_ID"
-          ls -la "$GITHUB_WORKSPACE/build/export"
+          # 找實際 IPA(Unity Product Name 不一定等於 buildName)
+          IPA=$(find "$GITHUB_WORKSPACE/build/export" -maxdepth 1 -name "*.ipa" -print -quit)
+          if [ -z "$IPA" ]; then
+            echo "::error::Export 完成但找不到 .ipa"
+            ls -la "$GITHUB_WORKSPACE/build/export"
+            exit 1
+          fi
+          echo "Found IPA: $IPA"
+          echo "ipa_path=$IPA" >> "$GITHUB_OUTPUT"
 
       - name: Upload to TestFlight
-        uses: apple-actions/upload-testflight-build@v3
+        uses: apple-actions/upload-testflight-build@v4  # @v3 已被棄用,@v4 用 App Store Connect API backend
         with:
-          app-path: build/export/unity-app.ipa
+          app-path: ${{ steps.export.outputs.ipa_path }}
           issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
           api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
           api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}

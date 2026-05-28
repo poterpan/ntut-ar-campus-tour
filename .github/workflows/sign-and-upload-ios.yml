@@ -16,13 +16,18 @@ concurrency:
   group: sign-ios-${{ github.ref }}
   cancel-in-progress: true
 
+# 需要 actions:read 才能下載其他 workflow run 的 artifact
+permissions:
+  contents: read
+  actions: read
+
 env:
   BUNDLE_ID: me.panspace.ntut-ar-campus-tour
 
 jobs:
   sign:
     name: Sign + Export + Upload to TestFlight
-    runs-on: macos-15
+    runs-on: macos-26  # 跟 build-ios 一致(Xcode 26.4 / iOS 26 SDK)
     timeout-minutes: 30
     steps:
       - name: Checkout (workflow file 用)

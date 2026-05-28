@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="NTUT AR campus guide app icon simple version">
+  <defs>
+    <linearGradient id="bg" x1="120" y1="80" x2="904" y2="944" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0757FF"/>
+      <stop offset="0.55" stop-color="#138CFF"/>
+      <stop offset="1" stop-color="#20C5F4"/>
+    </linearGradient>
+    <linearGradient id="pin" x1="384" y1="226" x2="640" y2="666" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#C7F1FF"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="28" stdDeviation="26" flood-color="#03245C" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+
+  <g fill="none" stroke="#D9F8FF" stroke-linecap="round" opacity="0.32">
+    <path d="M214 512c0-164 133-298 298-298s298 134 298 298" stroke-width="18"/>
+    <path d="M278 512c0-129 105-234 234-234s234 105 234 234" stroke-width="10"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <path d="M512 188c-112 0-203 90-203 202 0 142 156 274 190 300 8 6 18 6 26 0 34-26 190-158 190-300 0-112-91-202-203-202Z" fill="url(#pin)"/>
+    <circle cx="512" cy="391" r="72" fill="#073A82"/>
+    <circle cx="512" cy="391" r="34" fill="#24B9F5"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <path d="M188 764h648v64H188v-64Z" fill="#062563"/>
+    <path d="M246 632h104v132H246V632Z" fill="#073073"/>
+    <path d="M674 632h104v132H674V632Z" fill="#073073"/>
+    <path d="M218 600h160v48H218v-48Z" fill="#052762"/>
+    <path d="M646 600h160v48H646v-48Z" fill="#052762"/>
+    <path d="M388 622h248v142H388V622Z" fill="#08357C"/>
+    <path d="M360 586h304v56H360v-56Z" fill="#052762"/>
+    <path d="M442 692c0-39 31-70 70-70s70 31 70 70v72H442v-72Z" fill="#021D50"/>
+  </g>
+
+  <g fill="#BDEEFF" opacity="0.9">
+    <rect x="272" y="666" width="36" height="56" rx="8"/>
+    <rect x="716" y="666" width="36" height="56" rx="8"/>
+    <rect x="410" y="646" width="34" height="42" rx="7"/>
+    <rect x="580" y="646" width="34" height="42" rx="7"/>
+  </g>
+
+  <g fill="#05306B" opacity="0.92">
+    <circle cx="202" cy="690" r="44"/>
+    <rect x="192" y="688" width="20" height="86" rx="10"/>
+    <circle cx="822" cy="690" r="44"/>
+    <rect x="812" y="688" width="20" height="86" rx="10"/>
+  </g>
+
+  <g fill="none" stroke="#FFFFFF" stroke-width="16" stroke-linecap="round" opacity="0.92">
+    <path d="M262 276v-50h50"/>
+    <path d="M762 226h50v50"/>
+    <path d="M812 748v50h-50"/>
+    <path d="M312 798h-50v-50"/>
+  </g>
+</svg>
