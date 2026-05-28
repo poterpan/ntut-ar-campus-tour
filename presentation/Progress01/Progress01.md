@@ -18,3 +18,8 @@
 - 自製 POI Collector 工具:走到 POI 後即時取得 lat / lng,自動匯出 JSON
 - iOS 實機驗證:VPS 定位鎖定、POI 座標存檔皆正常
 - 校園貓 3D 模型導入 Unity 場景,完成基礎走位測試
+- 建立 GitHub Actions CI/CD:Unity → Xcode Archive → 簽署 → TestFlight 自動上傳
+- iOS 版本 0.1.0 已成功上架 TestFlight,組員皆可安裝測試
+
+![TestFlight 上架成功(版本 0.1.0)](images/testflight.png)
+![GitHub Actions 簽署 + 上傳 TestFlight 成功](images/ci-success.png)

@@ -204,6 +204,10 @@ def make_image_pair_flowable(items, base_dir):
         if target_h > max_h:
             target_h = max_h
             target_w = target_h / aspect
+        max_h = 80 * mm  # 縮小以保證單頁
+        if target_h > max_h:
+            target_h = max_h
+            target_w = target_h / aspect
         img_cells.append(Image(full_path, width=target_w, height=target_h))
         cap_cells.append(Paragraph(_format_caption(alt), cap_style))
     table = Table([img_cells, cap_cells], colWidths=[col_w, col_w])
