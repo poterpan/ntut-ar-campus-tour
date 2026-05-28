@@ -19,6 +19,15 @@ desktop.ini
 # ---- Claude Code 本機設定(個人,不入庫)----
 .claude/settings.local.json
 
+# ---- Codex CLI 工作目錄(個人,不入庫)----
+.codex/
+
+# ---- 大型影片素材(影片已上 YouTube,不必進 repo)----
+*.mov
+*.mp4
+*.MOV
+*.MP4
+
 # ---- Unity 自動產生的資料夾(unity-app/)----
 unity-app/[Ll]ibrary/
 unity-app/[Tt]emp/

@@ -1,0 +1,183 @@
+name: Build iOS → TestFlight
+
+# 驗證跑通前先只用手動觸發,避免亂燒 macOS 額度
+on:
+  workflow_dispatch:
+  # 驗證 OK 後把下面三行 uncomment 即可開自動:
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - 'unity-app/**'
+  #     - '.github/workflows/build-ios.yml'
+
+# 同分支連推多次只跑最新那次,舊的立刻取消
+concurrency:
+  group: build-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PROJECT_PATH: unity-app
+  BUNDLE_ID: me.panspace.ntut-ar-campus-tour
+
+jobs:
+  build:
+    name: Unity iOS Build + TestFlight Upload
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PROJECT_PATH }}/Library
+          key: Library-iOS-${{ hashFiles(format('{0}/Packages/packages-lock.json', env.PROJECT_PATH), format('{0}/ProjectSettings/**', env.PROJECT_PATH)) }}
+          restore-keys: |
+            Library-iOS-
+            Library-
+
+      - name: Unity → Xcode project
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: ${{ env.PROJECT_PATH }}
+          targetPlatform: iOS
+          buildName: unity-app
+          buildsPath: build
+          versioning: Semantic
+
+      - name: Import code-signing cert (.p12)
+        uses: apple-actions/import-codesign-certs@v3
+        with:
+          p12-file-base64: ${{ secrets.IOS_DIST_SIGNING_KEY }}
+          p12-password: ${{ secrets.IOS_DIST_SIGNING_KEY_PASSWORD }}
+
+      - name: Install provisioning profile
+        env:
+          PROFILE_BASE64: ${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}
+        run: |
+          PROFILE_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PROFILE_DIR"
+          echo -n "$PROFILE_BASE64" | base64 --decode > "$PROFILE_DIR/profile.mobileprovision"
+          UUID=$(security cms -D -i "$PROFILE_DIR/profile.mobileprovision" | plutil -extract UUID raw -)
+          echo "PROFILE_UUID=$UUID" >> $GITHUB_ENV
+          echo "Installed profile UUID: $UUID"
+
+      # ARCore Extensions 透過 CocoaPods 帶進 Pods_UnityFramework 等 framework,
+      # 需要在 archive 前先 pod install 才能讓 xcodebuild 找到
+      - name: CocoaPods install
+        working-directory: build/iOS/unity-app
+        run: |
+          if [ ! -f Podfile ]; then
+            echo "::warning::Podfile 不存在,跳過 pod install"
+            exit 0
+          fi
+          pod install --repo-update
+          ls -la *.xcworkspace 2>/dev/null || echo "warn: 沒看到 .xcworkspace"
+
+      - name: Install App Store Connect API Key
+        env:
+          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          APPSTORE_PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${APPSTORE_KEY_ID}.p8"
+          # printf %s + tr -d '\r':避免額外換行 + 清除 CRLF(GitHub Secret 偶會帶 \r)
+          printf '%s\n' "$APPSTORE_PRIVATE_KEY" | tr -d '\r' > "$KEY_PATH"
+          chmod 600 "$KEY_PATH"
+          # 診斷:確認 PEM 結構正確(若還是 fail 可看下次 log)
+          echo "--- API Key diagnostics ---"
+          echo "Size: $(wc -c < "$KEY_PATH") bytes"
+          echo "Lines: $(wc -l < "$KEY_PATH")"
+          echo "First line: $(head -1 "$KEY_PATH")"
+          echo "Last line: $(tail -1 "$KEY_PATH")"
+          echo "Has CR? $(grep -c $'\r' "$KEY_PATH" 2>/dev/null || echo 0)"
+
+      - name: Create ExportOptions.plist
+        env:
+          TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+        run: |
+          cat > "$GITHUB_WORKSPACE/ExportOptions.plist" << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store</string>
+              <key>teamID</key>
+              <string>${TEAM_ID}</string>
+              <key>signingStyle</key>
+              <string>automatic</string>
+              <key>stripSwiftSymbols</key>
+              <true/>
+              <key>uploadBitcode</key>
+              <false/>
+              <key>uploadSymbols</key>
+              <true/>
+          </dict>
+          </plist>
+          EOF
+          echo "--- ExportOptions.plist ---"
+          cat "$GITHUB_WORKSPACE/ExportOptions.plist"
+
+      - name: Build archive (.xcarchive)
+        working-directory: build/iOS/unity-app  # game-ci 預設輸出位置:<buildsPath>/<targetPlatform>/<buildName>
+        env:
+          TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+        run: |
+          # 用 .xcworkspace(CocoaPods 整合後的工作區),而非單獨 .xcodeproj,
+          # 才能正確 link Pods_UnityFramework 等 framework
+          # Automatic signing + API Key 驗證:子 Swift Package 不會被全域 PROVISIONING_PROFILE 誤套
+          xcodebuild -workspace Unity-iPhone.xcworkspace \
+            -scheme Unity-iPhone \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath "$GITHUB_WORKSPACE/build/unity-app.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyID "$APPSTORE_KEY_ID" \
+            -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${APPSTORE_KEY_ID}.p8" \
+            -authenticationKeyIssuerID "$APPSTORE_ISSUER_ID" \
+            archive \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            CODE_SIGN_STYLE=Automatic
+
+      - name: Export IPA
+        env:
+          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath "$GITHUB_WORKSPACE/build/unity-app.xcarchive" \
+            -exportPath "$GITHUB_WORKSPACE/build/export" \
+            -exportOptionsPlist "$GITHUB_WORKSPACE/ExportOptions.plist" \
+            -allowProvisioningUpdates \
+            -authenticationKeyID "$APPSTORE_KEY_ID" \
+            -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${APPSTORE_KEY_ID}.p8" \
+            -authenticationKeyIssuerID "$APPSTORE_ISSUER_ID"
+          ls -la "$GITHUB_WORKSPACE/build/export"
+
+      - name: Upload to TestFlight
+        uses: apple-actions/upload-testflight-build@v3
+        with:
+          app-path: build/export/unity-app.ipa
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+
+      - name: Upload IPA + archive as artifact (debug 用)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build-${{ github.run_number }}
+          path: |
+            build/export/*.ipa
+            build/unity-app.xcarchive
+          retention-days: 7
