@@ -1,14 +1,13 @@
 name: Build iOS → TestFlight
 
-# 驗證跑通前先只用手動觸發,避免亂燒 macOS 額度
+# main 上更動 unity-app/ 或 workflow 自身 → 自動跑 iOS build → TestFlight
 on:
   workflow_dispatch:
-  # 驗證 OK 後把下面三行 uncomment 即可開自動:
-  # push:
-  #   branches: [main]
-  #   paths:
-  #     - 'unity-app/**'
-  #     - '.github/workflows/build-ios.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'unity-app/**'
+      - '.github/workflows/build-ios.yml'
 
 # 同分支連推多次只跑最新那次,舊的立刻取消
 concurrency:
