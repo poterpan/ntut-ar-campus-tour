@@ -1,0 +1,148 @@
+name: iOS Sign + Upload (fast iteration, 從現有 xcarchive)
+
+# 用途:當 build-ios.yml 的 Unity → Xcode → Archive 都過了、只有 Export/Upload 那段
+# 還在 debug 時,這個 workflow 直接吃前一次 build-ios run 的 xcarchive artifact,
+# 跳過 ~15 分鐘 Unity build,~3 分鐘內可以 iterate 簽署 / 上傳邏輯。
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: '來源 build-ios run ID(從該 run 撈 ios-build-* artifact 裡的 xcarchive)'
+        required: true
+        type: string
+
+concurrency:
+  group: sign-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BUNDLE_ID: me.panspace.ntut-ar-campus-tour
+
+jobs:
+  sign:
+    name: Sign + Export + Upload to TestFlight
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - name: Checkout (workflow file 用)
+        uses: actions/checkout@v4
+
+      - name: Download xcarchive artifact from source run
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ios-build-*
+          path: ${{ github.workspace }}/artifacts
+          run-id: ${{ inputs.source_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          merge-multiple: true
+
+      - name: Verify xcarchive
+        env:
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+        run: |
+          ARCHIVE=$(find "$GITHUB_WORKSPACE/artifacts" -name "*.xcarchive" -type d -maxdepth 3 -print -quit)
+          if [ -z "$ARCHIVE" ]; then
+            echo "::error::artifacts 內找不到 .xcarchive,run_id $SOURCE_RUN_ID 是否正確?"
+            ls -laR "$GITHUB_WORKSPACE/artifacts" | head -30
+            exit 1
+          fi
+          echo "Found archive: $ARCHIVE"
+          # 統一搬到 build/ 路徑下,後續 step 路徑跟 build-ios.yml 一致
+          mkdir -p "$GITHUB_WORKSPACE/build"
+          mv "$ARCHIVE" "$GITHUB_WORKSPACE/build/unity-app.xcarchive"
+
+      - name: Import code-signing cert (.p12)
+        uses: apple-actions/import-codesign-certs@v3
+        with:
+          p12-file-base64: ${{ secrets.IOS_DIST_SIGNING_KEY }}
+          p12-password: ${{ secrets.IOS_DIST_SIGNING_KEY_PASSWORD }}
+
+      - name: Install provisioning profile
+        env:
+          PROFILE_BASE64: ${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}
+        run: |
+          PROFILE_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PROFILE_DIR"
+          echo -n "$PROFILE_BASE64" | base64 --decode > "$PROFILE_DIR/profile.mobileprovision"
+
+      - name: Install App Store Connect API Key
+        env:
+          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          APPSTORE_PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${APPSTORE_KEY_ID}.p8"
+          printf '%s\n' "$APPSTORE_PRIVATE_KEY" | tr -d '\r' > "$KEY_PATH"
+          chmod 600 "$KEY_PATH"
+
+      - name: Create ExportOptions.plist
+        env:
+          TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+          PROFILE_NAME: ${{ secrets.IOS_PROVISION_PROFILE_NAME }}
+          BUNDLE_ID: ${{ env.BUNDLE_ID }}
+        run: |
+          cat > "$GITHUB_WORKSPACE/ExportOptions.plist" << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store-connect</string>
+              <key>teamID</key>
+              <string>${TEAM_ID}</string>
+              <key>signingStyle</key>
+              <string>manual</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>${BUNDLE_ID}</key>
+                  <string>${PROFILE_NAME}</string>
+              </dict>
+              <key>stripSwiftSymbols</key>
+              <true/>
+              <key>uploadBitcode</key>
+              <false/>
+              <key>uploadSymbols</key>
+              <true/>
+          </dict>
+          </plist>
+          EOF
+
+      - name: Export IPA
+        id: export
+        env:
+          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath "$GITHUB_WORKSPACE/build/unity-app.xcarchive" \
+            -exportPath "$GITHUB_WORKSPACE/build/export" \
+            -exportOptionsPlist "$GITHUB_WORKSPACE/ExportOptions.plist" \
+            -allowProvisioningUpdates \
+            -authenticationKeyID "$APPSTORE_KEY_ID" \
+            -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${APPSTORE_KEY_ID}.p8" \
+            -authenticationKeyIssuerID "$APPSTORE_ISSUER_ID"
+          IPA=$(find "$GITHUB_WORKSPACE/build/export" -maxdepth 1 -name "*.ipa" -print -quit)
+          if [ -z "$IPA" ]; then
+            echo "::error::Export 完成但找不到 .ipa"
+            ls -la "$GITHUB_WORKSPACE/build/export"
+            exit 1
+          fi
+          echo "Found IPA: $IPA"
+          echo "ipa_path=$IPA" >> "$GITHUB_OUTPUT"
+
+      - name: Upload to TestFlight
+        uses: apple-actions/upload-testflight-build@v4
+        with:
+          app-path: ${{ steps.export.outputs.ipa_path }}
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+
+      - name: Upload IPA as artifact (debug 用)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ipa-sign-rerun-${{ github.run_number }}
+          path: build/export/*.ipa
+          retention-days: 7
