@@ -31,7 +31,7 @@ unity-app/Assets/Scripts/Guide/
   GuideInteractionController.cs  # MonoBehaviour (場景大腦,Phase 1 debug 路徑)
   Mocks/
     MockLlmClient.cs MockTtsService.cs MockPoiAnchorProvider.cs   # MonoBehaviour mocks
-unity-app/Assets/Tests/EditMode/
+unity-app/Assets/Tests/EditMode/Guide/   # 子資料夾:Unity 禁止同資料夾多個 asmdef(EditMode/ 已有 NtutAR.Poi.Tests)
   NtutAR.Guide.Tests.asmdef      # references NtutAR.Guide, NtutAR.Poi
   GuideChatControllerTests.cs
 unity-app/Assets/Art/NPC/        # 4 個 FBX + Animator Controller + NpcGuide.prefab(Task 6 於 Unity 建)
@@ -114,13 +114,13 @@ namespace NtutAR.Guide
 ## Task 2: GuideChatController(測試先行)
 
 **Files:**
-- Create: `unity-app/Assets/Tests/EditMode/NtutAR.Guide.Tests.asmdef`
-- Create: `unity-app/Assets/Tests/EditMode/GuideChatControllerTests.cs`
+- Create: `unity-app/Assets/Tests/EditMode/Guide/NtutAR.Guide.Tests.asmdef`
+- Create: `unity-app/Assets/Tests/EditMode/Guide/GuideChatControllerTests.cs`
 - Create: `unity-app/Assets/Scripts/Guide/GuideChatController.cs`
 
 - [ ] **Step 1: 測試 asmdef**
 
-`unity-app/Assets/Tests/EditMode/NtutAR.Guide.Tests.asmdef`:
+`unity-app/Assets/Tests/EditMode/Guide/NtutAR.Guide.Tests.asmdef`:
 ```json
 {
     "name": "NtutAR.Guide.Tests",
@@ -151,7 +151,7 @@ namespace NtutAR.Guide
 
 - [ ] **Step 2: 失敗測試 `GuideChatControllerTests.cs`**(mock 同步完成,以 `.GetAwaiter().GetResult()` 在 `[Test]` 內等待,避免 async runner 問題)
 
-`unity-app/Assets/Tests/EditMode/GuideChatControllerTests.cs`:
+`unity-app/Assets/Tests/EditMode/Guide/GuideChatControllerTests.cs`:
 ```csharp
 using System;
 using System.Collections.Generic;
@@ -670,7 +670,7 @@ Test Runner → EditMode → 只跑 `NtutAR.Guide.Tests`,預期 **6 綠**(`Guide
 
 - [ ] **Step 9: commit(程式 + 測試 + mock + 資產 + 場景 + meta)**
 ```bash
-git add unity-app/Assets/Scripts/Guide unity-app/Assets/Tests/EditMode/NtutAR.Guide.Tests.asmdef unity-app/Assets/Tests/EditMode/NtutAR.Guide.Tests.asmdef.meta unity-app/Assets/Tests/EditMode/GuideChatControllerTests.cs unity-app/Assets/Tests/EditMode/GuideChatControllerTests.cs.meta
+git add unity-app/Assets/Scripts/Guide unity-app/Assets/Tests/EditMode/Guide/NtutAR.Guide.Tests.asmdef unity-app/Assets/Tests/EditMode/Guide/NtutAR.Guide.Tests.asmdef.meta unity-app/Assets/Tests/EditMode/Guide/GuideChatControllerTests.cs unity-app/Assets/Tests/EditMode/Guide/GuideChatControllerTests.cs.meta
 git commit -m "feat(npc): 導遊對話 Phase 1(mock-first)— GuideChatController + seams + mocks + UI + 互動 + EditMode 測試"
 git add unity-app/Assets/Art/NPC unity-app/Assets/Scenes/GuideNpcTest.unity unity-app/Assets/Scenes/GuideNpcTest.unity.meta unity-app/Assets/Art/NPC.meta unity-app/Assets/Art.meta
 git commit -m "feat(npc): NpcGuide 模型/Animator/prefab + 對話 UI + 測試場景"
