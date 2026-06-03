@@ -25,13 +25,13 @@ namespace NtutAR.Guide
             _tts = tts ?? throw new ArgumentNullException(nameof(tts));
         }
 
-        public async Task StartSessionAsync(NtutAR.Poi.Poi poi, CancellationToken ct = default)
+        public Task StartSessionAsync(NtutAR.Poi.Poi poi, CancellationToken ct = default)
         {
             _currentPoi = poi;
+            // 有開場白才講(Talk→Listening);沒有就讓 Greet(揮手)靠 Animator 的 exit-time 自然播完回 Listening,不強制狀態以免打斷揮手
             if (!string.IsNullOrEmpty(poi.shortDescription))
-                await SpeakAsGuideAsync(poi.shortDescription, ct);
-            else
-                NpcStateChanged?.Invoke(NpcState.Listening);
+                return SpeakAsGuideAsync(poi.shortDescription, ct);
+            return Task.CompletedTask;
         }
 
         public async Task AskAsync(string question, CancellationToken ct = default)

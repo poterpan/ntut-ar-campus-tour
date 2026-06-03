@@ -111,17 +111,17 @@ namespace NtutAR.Guide.Tests
         }
 
         [Test]
-        public void StartSession_EmptyShortDesc_NoSpeak_EndsListening()
+        public void StartSession_EmptyShortDesc_NoSpeakNoStateChange()
         {
             var tts = new FakeTts();
             var c = new GuideChatController(new FakeLlm(), tts);
-            NpcState last = NpcState.Talking;
-            c.NpcStateChanged += s => last = s;
+            int stateChanges = 0;
+            c.NpcStateChanged += s => stateChanges++;
 
             c.StartSessionAsync(MakePoi("")).GetAwaiter().GetResult();
 
             Assert.AreEqual(0, tts.Spoken.Count);
-            Assert.AreEqual(NpcState.Listening, last);
+            Assert.AreEqual(0, stateChanges);
         }
     }
 }
