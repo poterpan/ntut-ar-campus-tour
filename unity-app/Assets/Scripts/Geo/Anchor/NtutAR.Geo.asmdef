@@ -1,0 +1,20 @@
+{
+    "name": "NtutAR.Geo",
+    "rootNamespace": "NtutAR.Geo",
+    "references": [
+        "NtutAR.Poi",
+        "NtutAR.Guide",
+        "Google.XR.ARCoreExtensions",
+        "Unity.XR.ARFoundation",
+        "Unity.XR.ARSubsystems"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

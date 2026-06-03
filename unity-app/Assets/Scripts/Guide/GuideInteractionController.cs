@@ -62,6 +62,23 @@ namespace NtutAR.Guide
             }
             _npcInstance = Instantiate(_npcPrefab, anchor.position, anchor.rotation);
             _npcAnimator = _npcInstance.GetComponentInChildren<NpcAnimator>();
+            FaceCamera();
+        }
+
+        // Phase 2a:由 AR proximity driver 呼叫,顯示指定 POI 的 NPC(同一 POI 不重生)
+        public void ShowPoiByProximity(NtutAR.Poi.Poi poi)
+        {
+            if (_npcInstance != null && _activePoi.id == poi.id) return;
+            ShowNpc(poi);
+        }
+
+        private void FaceCamera()
+        {
+            if (_arCamera == null || _npcInstance == null) return;
+            var look = _arCamera.transform.position - _npcInstance.transform.position;
+            look.y = 0f;
+            if (look.sqrMagnitude > 0.001f)
+                _npcInstance.transform.rotation = Quaternion.LookRotation(look);
         }
 
         private void OpenChat()

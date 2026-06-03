@@ -1,12 +1,9 @@
 {
     "pois": [
-        { "id": "p01", "name": "校門口",         "lat": 25.043593212290668, "lng": 121.53319001415388, "altitude": 24.136355090886356, "anchorType": "Terrain", "shortDescription": "", "llmSystemPrompt": "" },
-        { "id": "p02", "name": "國百館",         "lat": 25.043633166987016, "lng": 121.53336406853296, "altitude": 24.272039216943090, "anchorType": "Terrain", "shortDescription": "", "llmSystemPrompt": "" },
-        { "id": "p03", "name": "土木館",         "lat": 25.043498067812440, "lng": 121.53338813170010, "altitude": 24.209809488616885, "anchorType": "Terrain", "shortDescription": "", "llmSystemPrompt": "" },
-        { "id": "p04", "name": "學餐入口",       "lat": 25.043698462660577, "lng": 121.53366466922937, "altitude": 24.333744423463940, "anchorType": "Terrain", "shortDescription": "", "llmSystemPrompt": "" },
-        { "id": "p05", "name": "大圓球",         "lat": 25.043610334019914, "lng": 121.53362452832033, "altitude": 24.387642802670599, "anchorType": "Terrain", "shortDescription": "", "llmSystemPrompt": "" },
-        { "id": "p06", "name": "第一教學樓",     "lat": 25.043563461366735, "lng": 121.53385922552877, "altitude": 24.582515378482640, "anchorType": "Terrain", "shortDescription": "", "llmSystemPrompt": "" },
-        { "id": "p07", "name": "國際演講廳入口", "lat": 25.043663622032587, "lng": 121.53398796604488, "altitude": 24.509720870293678, "anchorType": "Terrain", "shortDescription": "", "llmSystemPrompt": "" },
-        { "id": "p08", "name": "化工館",         "lat": 25.043680003476699, "lng": 121.53439591644180, "altitude": 24.612994682043790, "anchorType": "Terrain", "shortDescription": "", "llmSystemPrompt": "" }
+        { "id": "p01", "name": "新生南路側門",   "lat": 25.043593212290668, "lng": 121.53319001415388, "altitude": 24.136355090886356, "anchorType": "Terrain", "shortDescription": "", "llmSystemPrompt": "" },
+        { "id": "p02", "name": "學生餐廳入口",   "lat": 25.043698462660577, "lng": 121.53366466922937, "altitude": 24.333744423463940, "anchorType": "Terrain", "shortDescription": "", "llmSystemPrompt": "" },
+        { "id": "p03", "name": "演講廳入口",     "lat": 25.043663622032587, "lng": 121.53398796604488, "altitude": 24.509720870293678, "anchorType": "Terrain", "shortDescription": "", "llmSystemPrompt": "" },
+        { "id": "p04", "name": "第一教學大樓",   "lat": 25.043563461366735, "lng": 121.53385922552877, "altitude": 24.582515378482640, "anchorType": "Terrain", "shortDescription": "", "llmSystemPrompt": "" },
+        { "id": "p05", "name": "化工館",         "lat": 25.043680003476699, "lng": 121.53439591644180, "altitude": 24.612994682043790, "anchorType": "Terrain", "shortDescription": "", "llmSystemPrompt": "" }
     ]
 }
