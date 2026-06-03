@@ -22,14 +22,17 @@
 ## File Structure
 ```
 unity-app/Assets/Scripts/Geo/
-  NtutAR.Geo.asmdef            # 新:references NtutAR.Poi, NtutAR.Guide, ARCore Extensions(納入既有 POICollector)
-  AnchorSeams.cs                # IAnchorResolver / AnchorResolveResult / AnchorResolveStatus
-  AnchorRegistry.cs             # 純邏輯:解析調度 + registry(可單測)
-  GeospatialAnchorManager.cs    # MonoBehaviour;持 AnchorRegistry;實作 IPoiAnchorProvider
-  MockAnchorResolver.cs         # 編輯器/測試:回相機前固定 Transform
-  ArCoreAnchorResolver.cs       # 實機:ARCore Terrain/Geospatial 解析
-  ArLocalizationController.cs   # VPS 狀態機 + overlay
-  (既有)POICollector.cs / Editor/*
+  POICollector.cs               # (既有)留 Assembly-CSharp —— 依賴 Geospatial Sample 的 GeospatialController,不可被 asmdef 捕獲
+  Anchor/                        # 新組件(不含 POICollector;否則它在 asmdef 內看不到範例 → CS0246)
+    NtutAR.Geo.asmdef            # references NtutAR.Poi, NtutAR.Guide, Google.XR.ARCoreExtensions, Unity.XR.ARFoundation, Unity.XR.ARSubsystems
+    AnchorSeams.cs                # IAnchorResolver / AnchorResolveResult / AnchorResolveStatus
+    AnchorRegistry.cs             # 純邏輯:解析調度 + registry(可單測)
+    GeospatialAnchorManager.cs    # MonoBehaviour;持 AnchorRegistry;實作 IPoiAnchorProvider
+    MockAnchorResolver.cs         # 編輯器/測試:回相機前固定 Transform
+    ArCoreAnchorResolver.cs       # 實機:ARCore Terrain/Geospatial 解析
+    ArLocalizationController.cs   # VPS 狀態機 + overlay
+    ArGuideProximityDriver.cs     # 讀 geo-pose → GetNearest → 呼叫 Guide(維持 Guide 不依賴 ARCore)
+  (既有)../Editor/* postprocessor 不受影響
 unity-app/Assets/Scripts/Guide/
   GuideInteractionController.cs # 改:加 AR proximity 路徑
 unity-app/Assets/Data/poi_data.json   # 收斂成 5 個主動 POI
