@@ -68,6 +68,7 @@ unity-app/[Aa]ssets/Plugins/Editor/JetBrains*
 
 # ---- Unity 崩潰報告 / meta 雜項 ----
 unity-app/sysinfo.txt
+unity-app/mono_crash.*.json
 unity-app/*.pidb.meta
 unity-app/*.pdb.meta
 unity-app/*.mdb.meta
@@ -78,6 +79,10 @@ unity-app/*.aab
 unity-app/*.unitypackage
 unity-app/*.app
 unity-app/crashlytics-build.properties
+
+# ---- 測試結果(Unity Test Runner 產物)----
+unity-app/TestResults.xml
+unity-app/[Tt]est[Rr]esults/
 
 # ---- Addressables / StreamingAssets 自動產生 ----
 unity-app/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
