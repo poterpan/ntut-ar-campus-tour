@@ -84,6 +84,10 @@ unity-app/crashlytics-build.properties
 unity-app/TestResults.xml
 unity-app/[Tt]est[Rr]esults/
 
+# ---- MCP / debug 截圖(不入庫)----
+unity-app/[Aa]ssets/Screenshots/
+unity-app/[Aa]ssets/Screenshots.meta
+
 # ---- Addressables / StreamingAssets 自動產生 ----
 unity-app/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
 unity-app/[Aa]ssets/[Ss]treamingAssets/aa.meta
