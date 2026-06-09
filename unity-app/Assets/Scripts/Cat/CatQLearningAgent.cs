@@ -12,6 +12,9 @@ namespace NtutAR.Cat
     /// </summary>
     public class CatQLearningAgent : MonoBehaviour
     {
+        /// <summary>貓咪成功吃到罐頭時觸發(供召喚流程接續吃完後的生命週期)</summary>
+        public event Action TargetReached;
+
         [Header("訓練/測試模式")]
         [Tooltip("勾選後可使用鍵盤控制:W 鍵直走,A 鍵左轉,D 鍵右轉(僅 Editor)")]
         [SerializeField] private bool _heuristicMode = false;
@@ -218,6 +221,20 @@ namespace NtutAR.Cat
         }
 
         /// <summary>
+        /// 指定新的目標罐頭(召喚流程用):自動補上碰撞偵測設定並重算距離基準。
+        /// 傳入 null 會讓貓咪進入待機。
+        /// </summary>
+        public void SetTarget(Transform can)
+        {
+            _targetCan = can;
+            if (can != null)
+            {
+                SetupUserCan(can.gameObject);
+                _lastDistanceToTarget = Vector3.Distance(transform.position, can.position);
+            }
+        }
+
+        /// <summary>
         /// 重置回合 (Episode)
         /// </summary>
         /// <param name="resetAgent">是否將貓咪重置回起點</param>
@@ -243,7 +260,10 @@ namespace NtutAR.Cat
                 _targetCan.position = new Vector3(_spawnPosition.x + randomCircle.x, _spawnPosition.y, _spawnPosition.z + randomCircle.y);
             }
 
-            _lastDistanceToTarget = Vector3.Distance(transform.position, _targetCan.position);
+            if (_targetCan != null)
+            {
+                _lastDistanceToTarget = Vector3.Distance(transform.position, _targetCan.position);
+            }
 
             // 3. 衰減 Epsilon (僅在訓練模式下)
             if (_isTraining && _currentEpsilon > _minEpsilon)
@@ -261,6 +281,9 @@ namespace NtutAR.Cat
         /// </summary>
         private void CheckBoundary()
         {
+            // 出界懲罰只在訓練時有意義;展示/召喚模式下把貓傳送回起點的體驗很差,直接跳過
+            if (!_isTraining) return;
+
             float distanceFromCenter = Vector3.Distance(transform.position, _spawnPosition);
             if (distanceFromCenter > _boundaryRadius)
             {
@@ -326,7 +349,12 @@ namespace NtutAR.Cat
         /// </summary>
         private void MakeDecision()
         {
-            if (_targetCan == null) return;
+            if (_targetCan == null)
+            {
+                // 沒有目標就待機,把跑步動畫停下來
+                if (_catAnimator != null) _catAnimator.SetFloat("Speed", 0f);
+                return;
+            }
 
             int state = GetCurrentState();
             int action = 0;
@@ -537,6 +565,8 @@ namespace NtutAR.Cat
 
             // 重置回合,是否傳送貓咪回原點取決於 resetAgentOnSuccess 變數
             ResetEpisode(_resetAgentOnSuccess);
+
+            TargetReached?.Invoke();
         }
 
         #region Q-Table 存檔與讀取

@@ -1,7 +1,11 @@
 {
     "name": "NtutAR.Cat",
     "rootNamespace": "NtutAR.Cat",
-    "references": [],
+    "references": [
+        "Unity.XR.ARFoundation",
+        "Unity.XR.ARSubsystems",
+        "UnityEngine.UI"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
