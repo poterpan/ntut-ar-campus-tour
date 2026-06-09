@@ -52,8 +52,8 @@ MonoBehaviour:
   _trainingSpeedScale: 1
   _qTableAsset: {fileID: 4900000, guid: e218e104069d91d4786dec44340d94a4, type: 3}
   _targetCan: {fileID: 0}
-  _autoCreateCan: 1
-  _randomizeTargetPosition: 1
+  _autoCreateCan: 0
+  _randomizeTargetPosition: 0
   _resetAgentOnSuccess: 0
   _moveSpeed: 3
   _turnSpeed: 150
