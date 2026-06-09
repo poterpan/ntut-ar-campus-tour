@@ -1,0 +1,19 @@
+{
+    "name": "NtutAR.Ui.Tests",
+    "rootNamespace": "NtutAR.Ui.Tests",
+    "references": [
+        "NtutAR.Ui",
+        "NtutAR.Poi",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": ["nunit.framework.dll"],
+    "autoReferenced": false,
+    "defineConstraints": ["UNITY_INCLUDE_TESTS"],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
