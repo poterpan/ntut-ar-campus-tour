@@ -1,0 +1,128 @@
+<h2>其餘畫面設計預覽</h2>
+<p class="subtitle">開場流程 + 上拉抽屜展開 + 集章圖鑑 + NPC 對話。確認方向,細節之後實作時再調。</p>
+
+<style>
+  .mini { width: 150px; height: 310px; border-radius: 18px; border: 3px solid #2b2b2b; position: relative; overflow: hidden; flex-shrink: 0; }
+  .glass2 { background: rgba(255,252,245,.78); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.6); box-shadow: 0 2px 8px rgba(93,64,55,.15); }
+  .cam { background: url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=400&q=50') center/cover, #7d8a5e; }
+  .warm { background: linear-gradient(170deg,#f7f1e5,#eddfc8); }
+  .tt { color:#5d4037; }
+</style>
+
+<div class="section">
+  <h3>1. 開場流程(Demo 影片第一鏡頭)</h3>
+  <div style="display:flex;gap:12px;align-items:center;overflow-x:auto;padding:10px 0;">
+    <div class="mini warm">
+      <div style="position:absolute;top:34%;left:0;right:0;text-align:center;">
+        <div style="font-size:34px;">🐱</div>
+        <div class="tt" style="font-size:13px;font-weight:800;margin-top:6px;">北科尋貓記</div>
+        <div style="font-size:8px;color:#a1887f;margin-top:3px;">AR 校園導覽</div>
+      </div>
+      <div style="position:absolute;bottom:18px;left:0;right:0;text-align:center;font-size:7px;color:#bcaaa4;">NTUT · 2026</div>
+    </div>
+    <div style="color:#888;">→</div>
+    <div class="mini warm">
+      <div style="position:absolute;top:24%;left:14px;right:14px;text-align:center;">
+        <div style="font-size:26px;">📷 📍</div>
+        <div class="tt" style="font-size:10px;font-weight:700;margin-top:8px;">需要相機與定位權限</div>
+        <div style="font-size:8px;color:#a1887f;margin-top:5px;line-height:1.5;">AR 導覽需要透過相機辨識周遭環境,並用 GPS 找到你在校園的位置</div>
+        <div style="margin-top:12px;background:#aed581;border-radius:18px;padding:6px 0;font-size:9px;font-weight:700;color:#fff;">好,開始吧</div>
+      </div>
+    </div>
+    <div style="color:#888;">→</div>
+    <div class="mini cam">
+      <div style="position:absolute;inset:0;background:rgba(40,30,20,.35);"></div>
+      <div class="glass2" style="position:absolute;top:40%;left:16px;right:16px;border-radius:14px;padding:10px;text-align:center;">
+        <div style="font-size:18px;">🐾</div>
+        <div class="tt" style="font-size:9px;font-weight:700;margin-top:4px;">正在尋找你的位置…</div>
+        <div style="font-size:7px;color:#a1887f;margin-top:3px;">對著周圍建築物緩慢環視</div>
+      </div>
+    </div>
+    <div style="color:#888;">→</div>
+    <div class="mini cam">
+      <div class="glass2" style="position:absolute;top:36%;left:20px;right:20px;border-radius:14px;padding:8px;text-align:center;">
+        <div class="tt" style="font-size:9px;font-weight:800;">✅ 定位完成!</div>
+        <div style="font-size:7px;color:#a1887f;margin-top:2px;">歡迎來到北科大</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>2. 主要面板</h3>
+  <div style="display:flex;gap:14px;overflow-x:auto;padding:10px 0;">
+    <div>
+      <div class="mini cam">
+        <div style="position:absolute;inset:0;background:rgba(40,30,20,.25);"></div>
+        <div class="glass2" style="position:absolute;bottom:0;left:0;right:0;height:62%;border-radius:16px 16px 0 0;padding:8px 10px;">
+          <div style="width:30px;height:3px;background:#bcaaa4;border-radius:2px;margin:0 auto 6px;"></div>
+          <div class="tt" style="font-size:9px;font-weight:800;margin-bottom:6px;">校園景點 (3/8)</div>
+          <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.7);border-radius:10px;padding:5px;margin-bottom:5px;">
+            <div style="width:22px;height:22px;border-radius:6px;background:#d7ccc8;display:flex;align-items:center;justify-content:center;font-size:10px;">🏛️</div>
+            <div style="flex:1;"><div class="tt" style="font-size:8px;font-weight:700;">北科紅樓</div><div style="font-size:6px;color:#a1887f;">35m · 已收藏 ✅</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.7);border-radius:10px;padding:5px;margin-bottom:5px;">
+            <div style="width:22px;height:22px;border-radius:6px;background:#d7ccc8;display:flex;align-items:center;justify-content:center;font-size:10px;">🌳</div>
+            <div style="flex:1;"><div class="tt" style="font-size:8px;font-weight:700;">大草坪</div><div style="font-size:6px;color:#a1887f;">120m · 未探索</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.7);border-radius:10px;padding:5px;opacity:.75;">
+            <div style="width:22px;height:22px;border-radius:6px;background:#d7ccc8;display:flex;align-items:center;justify-content:center;font-size:10px;">⛩️</div>
+            <div style="flex:1;"><div class="tt" style="font-size:8px;font-weight:700;">光廊</div><div style="font-size:6px;color:#a1887f;">240m · 未探索</div></div>
+          </div>
+        </div>
+      </div>
+      <p class="label" style="text-align:center;margin-top:6px;">上拉抽屜:POI 列表</p>
+    </div>
+    <div>
+      <div class="mini warm">
+        <div style="padding:12px 10px;">
+          <div class="tt" style="font-size:11px;font-weight:800;text-align:center;">探索手帳 📖</div>
+          <div style="font-size:7px;color:#a1887f;text-align:center;margin-top:2px;">收集 3 / 8 枚紀念章</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;">
+            <div style="aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ef9a4d,#d84315);display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid #fff;box-shadow:0 2px 5px rgba(93,64,55,.25);">🏛️</div>
+            <div style="aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#9ccc65,#558b2f);display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid #fff;box-shadow:0 2px 5px rgba(93,64,55,.25);">🌳</div>
+            <div style="aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#4fc3f7,#0277bd);display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid #fff;box-shadow:0 2px 5px rgba(93,64,55,.25);">💧</div>
+            <div style="aspect-ratio:1;border-radius:50%;border:2px dashed #bcaaa4;display:flex;align-items:center;justify-content:center;font-size:12px;color:#bcaaa4;">?</div>
+            <div style="aspect-ratio:1;border-radius:50%;border:2px dashed #bcaaa4;display:flex;align-items:center;justify-content:center;font-size:12px;color:#bcaaa4;">?</div>
+            <div style="aspect-ratio:1;border-radius:50%;border:2px dashed #bcaaa4;display:flex;align-items:center;justify-content:center;font-size:12px;color:#bcaaa4;">?</div>
+          </div>
+          <div style="margin-top:12px;background:rgba(255,255,255,.7);border-radius:10px;padding:6px;text-align:center;">
+            <span style="font-size:7px;color:#8d6e63;">🐱 已餵食校園貓 5 次</span>
+          </div>
+        </div>
+      </div>
+      <p class="label" style="text-align:center;margin-top:6px;">集章圖鑑(全螢幕)</p>
+    </div>
+    <div>
+      <div class="mini cam">
+        <div style="position:absolute;inset:0;background:rgba(40,30,20,.2);"></div>
+        <div style="position:absolute;top:26%;left:50%;transform:translateX(-50%);font-size:34px;">🧑‍🏫</div>
+        <div class="glass2" style="position:absolute;bottom:0;left:0;right:0;height:46%;border-radius:16px 16px 0 0;padding:8px 10px;">
+          <div style="display:flex;align-items:center;gap:5px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:#ffcc80;"></div>
+            <span class="tt" style="font-size:8px;font-weight:800;">小導 · 校園導遊</span>
+          </div>
+          <div style="background:rgba(255,255,255,.75);border-radius:0 10px 10px 10px;padding:6px;margin-top:5px;">
+            <span class="tt" style="font-size:7px;line-height:1.5;">紅樓是北科最老的建築喔!1918 年就蓋好了,以前是學生宿舍…</span>
+          </div>
+          <div style="display:flex;gap:4px;margin-top:6px;">
+            <div style="flex:1;background:rgba(255,255,255,.8);border-radius:14px;padding:4px 8px;font-size:7px;color:#a1887f;">想問什麼呢…</div>
+            <div style="width:22px;height:22px;border-radius:50%;background:#aed581;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;">↑</div>
+          </div>
+        </div>
+      </div>
+      <p class="label" style="text-align:center;margin-top:6px;">NPC 對話(毛玻璃半版)</p>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="ok" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content"><h3>方向 OK,進入總體設計彙整</h3><p>細節(文案、圖示)實作時再微調</p></div>
+  </div>
+  <div class="option" data-choice="revise" onclick="toggleSelect(this)">
+    <div class="letter">✎</div>
+    <div class="content"><h3>有想調整的地方</h3><p>在終端機告訴我哪裡要改</p></div>
+  </div>
+</div>

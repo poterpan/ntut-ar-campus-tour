@@ -1,0 +1,84 @@
+<h2>AR 主畫面的 HUD 怎麼配置？</h2>
+<p class="subtitle">兩種配置,都套用「皮克敏暖色 + 毛玻璃」風格。背景模擬相機畫面。</p>
+
+<style>
+  .phone { width: 270px; height: 560px; border-radius: 28px; border: 5px solid #2b2b2b; position: relative; overflow: hidden;
+    background: url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=600&q=60') center/cover, linear-gradient(160deg,#9aa56e,#6b7d52); }
+  .glass { background: rgba(255,252,245,.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.6); box-shadow: 0 2px 10px rgba(93,64,55,.18); }
+  .phone .t { color:#5d4037; }
+</style>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">配置 A — 「狀態在上、行動在下」(Pokémon GO 慣例)</div>
+    <div class="mockup-body" style="display:flex;justify-content:center;padding:18px;background:#1a1a2e;">
+      <div class="phone" data-choice="layout-a" onclick="toggleSelect(this)">
+        <!-- 玩家狀態列 左上 -->
+        <div class="glass" style="position:absolute;top:12px;left:10px;border-radius:30px;padding:5px 12px 5px 5px;display:flex;align-items:center;gap:7px;">
+          <div style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffcc80,#ef9a4d);border:2px solid #fff;"></div>
+          <div>
+            <div class="t" style="font-size:9px;font-weight:800;">柏嘉</div>
+            <div style="font-size:7px;color:#8d6e63;">探索 3/8 個景點</div>
+          </div>
+        </div>
+        <!-- 小地圖 右上 -->
+        <div class="glass" style="position:absolute;top:12px;right:10px;width:62px;height:62px;border-radius:50%;overflow:hidden;">
+          <div style="position:absolute;inset:4px;border-radius:50%;background:#cfe3b8;">
+            <div style="position:absolute;top:45%;left:45%;width:9px;height:9px;background:#fff;border:2px solid #66bb6a;border-radius:50%;"></div>
+            <div style="position:absolute;top:20%;left:60%;width:7px;height:7px;background:#e57373;border-radius:50%;"></div>
+            <div style="position:absolute;top:65%;left:25%;width:7px;height:7px;background:#ffb74d;border-radius:50%;"></div>
+          </div>
+        </div>
+        <!-- POI 接近提示 上中 -->
+        <div class="glass" style="position:absolute;top:86px;left:50%;transform:translateX(-50%);border-radius:24px;padding:6px 14px;white-space:nowrap;">
+          <span class="t" style="font-size:9px;font-weight:700;">🏛️ 紅樓在前方 35m</span>
+        </div>
+        <!-- 圖鑑按鈕 右下 -->
+        <div class="glass" style="position:absolute;bottom:96px;right:12px;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;">📖</div>
+        <!-- 罐頭按鈕 下中 -->
+        <div style="position:absolute;bottom:78px;left:50%;transform:translateX(-50%);width:62px;height:62px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffcc80,#f57c00);border:4px solid rgba(255,252,245,.9);box-shadow:0 4px 14px rgba(93,64,55,.35);display:flex;align-items:center;justify-content:center;font-size:24px;">🥫</div>
+        <!-- 抽屜把手 底部 -->
+        <div class="glass" style="position:absolute;bottom:0;left:0;right:0;height:54px;border-radius:18px 18px 0 0;text-align:center;">
+          <div style="width:36px;height:4px;background:#bcaaa4;border-radius:2px;margin:7px auto 4px;"></div>
+          <span class="t" style="font-size:9px;font-weight:600;">校園景點 · 上拉看全部</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">配置 B — 「左右分欄」(小地圖左上、垂直工具列右側)</div>
+    <div class="mockup-body" style="display:flex;justify-content:center;padding:18px;background:#1a1a2e;">
+      <div class="phone" data-choice="layout-b" onclick="toggleSelect(this)">
+        <!-- 小地圖 左上 -->
+        <div class="glass" style="position:absolute;top:12px;left:10px;width:62px;height:62px;border-radius:50%;overflow:hidden;">
+          <div style="position:absolute;inset:4px;border-radius:50%;background:#cfe3b8;">
+            <div style="position:absolute;top:45%;left:45%;width:9px;height:9px;background:#fff;border:2px solid #66bb6a;border-radius:50%;"></div>
+            <div style="position:absolute;top:20%;left:60%;width:7px;height:7px;background:#e57373;border-radius:50%;"></div>
+          </div>
+        </div>
+        <!-- 玩家狀態 貼在小地圖下 -->
+        <div class="glass" style="position:absolute;top:80px;left:10px;border-radius:20px;padding:4px 10px;">
+          <span style="font-size:7px;color:#8d6e63;">探索 3/8</span>
+        </div>
+        <!-- 右側垂直工具列 -->
+        <div style="position:absolute;top:90px;right:12px;display:flex;flex-direction:column;gap:10px;">
+          <div class="glass" style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;">📖</div>
+          <div class="glass" style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;">🥫</div>
+          <div class="glass" style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;">💬</div>
+        </div>
+        <!-- POI 接近提示 上中 -->
+        <div class="glass" style="position:absolute;top:30px;left:50%;transform:translateX(-50%);border-radius:24px;padding:6px 14px;white-space:nowrap;margin-left:20px;">
+          <span class="t" style="font-size:9px;font-weight:700;">🏛️ 紅樓在前方 35m</span>
+        </div>
+        <!-- 抽屜把手 底部 -->
+        <div class="glass" style="position:absolute;bottom:0;left:0;right:0;height:54px;border-radius:18px 18px 0 0;text-align:center;">
+          <div style="width:36px;height:4px;background:#bcaaa4;border-radius:2px;margin:7px auto 4px;"></div>
+          <span class="t" style="font-size:9px;font-weight:600;">校園景點 · 上拉看全部</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:14px;">配置 A:罐頭是「主角行動」放正中下方(你說的寶可夢球位置),圖鑑在旁邊。配置 B:所有工具收進右側欄,畫面更乾淨,但罐頭降級成普通工具之一。點選手機畫面本身即可選擇。</p>
