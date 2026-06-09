@@ -20,6 +20,8 @@ namespace NtutAR.Geo
             if (Time.time < _next) return;
             _next = Time.time + _interval;
             if (_earthManager == null || _hud == null) return;
+            // AR Session 未啟動時(Editor / AR 初始化前)EarthManager 的 getter 會拋 NRE,先擋掉
+            if (!_earthManager.isActiveAndEnabled) return;
             if (_earthManager.EarthTrackingState != UnityEngine.XR.ARSubsystems.TrackingState.Tracking) return;
 
             if (!_notifiedLocalized && _onboarding != null)

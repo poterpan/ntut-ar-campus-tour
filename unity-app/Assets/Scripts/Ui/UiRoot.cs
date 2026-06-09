@@ -20,6 +20,7 @@ namespace NtutAR.Ui
         private void Start()
         {
             _drawerHandle.onClick.AddListener(() => _drawer.Toggle(_poiService, _hud.Exploration));
+            _hud.GeoUpdated += _drawer.UpdateGeo;
             _handbookButton.onClick.AddListener(() => _handbook.Open(_poiService, _hud.Exploration));
             if (_catSummon != null)
                 _catSummon.CatFed += () => _hud.Exploration.IncrementFeedCount();

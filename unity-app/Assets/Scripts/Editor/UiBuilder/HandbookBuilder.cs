@@ -29,8 +29,8 @@ namespace NtutAR.UiBuilder
             gridGo.transform.SetParent(bg.transform, false);
             var grid = gridGo.AddComponent<GridLayoutGroup>();
             UiBuilderKit.Place(grid, new Vector2(.5f, 1), new Vector2(.5f, 1), new Vector2(0, -220), new Vector2(960, 1100));
-            grid.cellSize = new Vector2(280, 320);
-            grid.spacing = new Vector2(40, 40);
+            grid.cellSize = new Vector2(280, 300);
+            grid.spacing = new Vector2(40, 30);
             grid.childAlignment = TextAnchor.UpperCenter;
 
             // 章 template
@@ -54,8 +54,8 @@ namespace NtutAR.UiBuilder
 
             // 餵貓計數 + 關閉鈕
             var feed = UiBuilderKit.MakeText(bg.transform, "FeedCount", "已餵食校園貓 0 次", 28, UiPalette.TextSub);
-            UiBuilderKit.Place(feed, new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 170), new Vector2(700, 40));
-            var closeBtn = UiBuilderKit.MakeRoundButton(bg.transform, "CloseButton", "✕", 110, UiPalette.ButtonGreen);
+            UiBuilderKit.Place(feed, new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 160), new Vector2(700, 40));
+            var closeBtn = UiBuilderKit.MakeRoundButton(bg.transform, "CloseButton", "關", 110, UiPalette.ButtonGreen);
             UiBuilderKit.Place(closeBtn.GetComponent<Image>(), new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 40), new Vector2(110, 110));
 
             var panel = canvas.AddComponent<HandbookPanel>();

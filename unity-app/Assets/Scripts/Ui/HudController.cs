@@ -25,6 +25,9 @@ namespace NtutAR.Ui
 
         public ExplorationService Exploration { get; private set; }
 
+        /// <summary>每次 geo 更新時轉發(供抽屜等其他面板更新距離)</summary>
+        public event System.Action<double, double> GeoUpdated;
+
         private bool _bannerVisible;
         private Coroutine _bannerTween;
 
@@ -46,6 +49,7 @@ namespace NtutAR.Ui
         /// <summary>由 ArHudGeoDriver / MockGeoDriver 以約 1Hz 呼叫。</summary>
         public void UpdateGeoPose(double lat, double lng)
         {
+            GeoUpdated?.Invoke(lat, lng);
             if (_minimap != null) _minimap.UpdatePlayer(lat, lng);
             if (_poiService == null) return;
 
