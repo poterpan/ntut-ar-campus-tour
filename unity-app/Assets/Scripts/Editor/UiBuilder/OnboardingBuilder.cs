@@ -16,12 +16,8 @@ namespace NtutAR.UiBuilder
 
             // Step 1: Splash(暖色全屏)
             var splash = MakeStep(safe, "Splash", true);
-            var logoBg = UiBuilderKit.MakeGlassPanel(splash.transform, "LogoBg");
-            logoBg.sprite = UiBuilderKit.CircleSprite; logoBg.type = Image.Type.Simple;
-            logoBg.color = UiPalette.AccentOrange;
-            UiBuilderKit.Place(logoBg, new Vector2(.5f, .5f), new Vector2(.5f, .5f), new Vector2(0, 200), new Vector2(220, 220));
-            var logoChar = UiBuilderKit.MakeText(logoBg.transform, "Char", "喵", 110, Color.white);
-            UiBuilderKit.Stretch((RectTransform)logoChar.transform);
+            var logo = UiBuilderKit.MakeCircularPhoto(splash.transform, "Logo", UiBuilderKit.Icon("AvatarCat"), 240);
+            UiBuilderKit.Place(logo, new Vector2(.5f, .5f), new Vector2(.5f, .5f), new Vector2(0, 200), new Vector2(240, 240));
             var appName = UiBuilderKit.MakeText(splash.transform, "AppName", "北科 AR 校園導覽", 56, UiPalette.TextMain, title: true);
             UiBuilderKit.Place(appName, new Vector2(.5f, .5f), new Vector2(.5f, .5f), new Vector2(0, 10), new Vector2(800, 80));
             var tagline = UiBuilderKit.MakeText(splash.transform, "Tagline", "邊逛邊聊,還有貓", 30, UiPalette.TextSub);

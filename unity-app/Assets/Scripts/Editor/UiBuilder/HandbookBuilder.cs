@@ -37,11 +37,10 @@ namespace NtutAR.UiBuilder
             var stamp = new GameObject("StampTemplate", typeof(RectTransform));
             stamp.transform.SetParent(gridGo.transform, false);
             var fill = UiBuilderKit.MakeGlassPanel(stamp.transform, "Fill");
-            fill.sprite = UiBuilderKit.CircleSprite; fill.type = Image.Type.Simple;
-            fill.color = UiPalette.AccentOrange;
+            fill.sprite = UiBuilderKit.Icon("StampBadge"); fill.type = Image.Type.Simple;
+            fill.color = Color.white;
+            fill.preserveAspect = true;
             UiBuilderKit.Place(fill, new Vector2(.5f, 1), new Vector2(.5f, 1), new Vector2(0, 0), new Vector2(220, 220));
-            var fillIcon = UiBuilderKit.MakeText(fill.transform, "Icon", "館", 90, Color.white);
-            UiBuilderKit.Stretch((RectTransform)fillIcon.transform);
             var locked = UiBuilderKit.MakeGlassPanel(stamp.transform, "Locked");
             locked.sprite = UiBuilderKit.CircleSprite; locked.type = Image.Type.Simple;
             locked.color = new Color(0.74f, 0.67f, 0.64f, 0.4f);

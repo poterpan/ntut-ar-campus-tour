@@ -72,6 +72,67 @@ namespace NtutAR.UiBuilder
             return tex;
         }
 
+        /// <summary>載入 Assets/Art/Ui/Icons/ 下的 icon,必要時矯正 importer 為 Single Sprite。</summary>
+        public static Sprite Icon(string name)
+        {
+            string path = $"Assets/Art/Ui/Icons/{name}.png";
+            var sp = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            if (sp != null) return sp;
+
+            var ti = (TextureImporter)AssetImporter.GetAtPath(path);
+            if (ti == null) { Debug.LogError($"[UiBuilder] 缺 icon: {path}"); return null; }
+            ti.textureType = TextureImporterType.Sprite;
+            ti.spriteImportMode = SpriteImportMode.Single;
+            ti.alphaIsTransparency = true;
+            ti.mipmapEnabled = false;
+            ti.SaveAndReimport();
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        }
+
+        /// <summary>圓形玻璃底 + 透明 icon 的按鈕。</summary>
+        public static Button MakeIconButton(Transform parent, string name, Sprite icon, float diameter, Color bgFill)
+        {
+            var img = MakeGlassPanel(parent, name);
+            img.sprite = CircleSprite;
+            img.type = Image.Type.Simple;
+            img.color = bgFill;
+            ((RectTransform)img.transform).sizeDelta = new Vector2(diameter, diameter);
+            var btn = img.gameObject.AddComponent<Button>();
+
+            var iconGo = new GameObject("Icon", typeof(RectTransform));
+            iconGo.transform.SetParent(img.transform, false);
+            var iconImg = iconGo.AddComponent<Image>();
+            iconImg.sprite = icon;
+            iconImg.preserveAspect = true;
+            iconImg.raycastTarget = false;
+            var rect = (RectTransform)iconGo.transform;
+            Stretch(rect);
+            float pad = diameter * 0.14f;
+            rect.offsetMin = new Vector2(pad, pad);
+            rect.offsetMax = new Vector2(-pad, -pad);
+            return btn;
+        }
+
+        /// <summary>圓形遮罩照片(頭像/Logo):圓 sprite 當 Mask,子物件放方形照片。</summary>
+        public static Image MakeCircularPhoto(Transform parent, string name, Sprite photo, float diameter)
+        {
+            var circle = MakeGlassPanel(parent, name);
+            circle.sprite = CircleSprite;
+            circle.type = Image.Type.Simple;
+            circle.color = Color.white;
+            ((RectTransform)circle.transform).sizeDelta = new Vector2(diameter, diameter);
+            var mask = circle.gameObject.AddComponent<Mask>();
+            mask.showMaskGraphic = true;
+
+            var photoGo = new GameObject("Photo", typeof(RectTransform));
+            photoGo.transform.SetParent(circle.transform, false);
+            var photoImg = photoGo.AddComponent<Image>();
+            photoImg.sprite = photo;
+            photoImg.raycastTarget = false;
+            Stretch((RectTransform)photoGo.transform);
+            return circle;
+        }
+
         /// <summary>512x512 反鋸齒實心圓。</summary>
         private static Texture2D GenCircle()
         {

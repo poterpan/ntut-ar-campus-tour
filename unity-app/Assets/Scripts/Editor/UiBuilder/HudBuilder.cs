@@ -18,12 +18,8 @@ namespace NtutAR.UiBuilder
             // ---- 玩家狀態列(左上) ----
             var status = UiBuilderKit.MakeGlassPanel(safe, "PlayerStatus");
             UiBuilderKit.Place(status, new Vector2(0, 1), new Vector2(0, 1), new Vector2(24, -24), new Vector2(340, 110));
-            var avatar = UiBuilderKit.MakeGlassPanel(status.transform, "Avatar");
-            avatar.sprite = UiBuilderKit.CircleSprite; avatar.type = Image.Type.Simple;
-            avatar.color = UiPalette.AccentOrange;
+            var avatar = UiBuilderKit.MakeCircularPhoto(status.transform, "Avatar", UiBuilderKit.Icon("AvatarCat"), 86);
             UiBuilderKit.Place(avatar, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(12, 0), new Vector2(86, 86));
-            var avatarChar = UiBuilderKit.MakeText(avatar.transform, "Char", "喵", 40, Color.white);
-            UiBuilderKit.Stretch((RectTransform)avatarChar.transform);
             var nick = UiBuilderKit.MakeText(status.transform, "Nickname", "探索者", 34, UiPalette.TextMain);
             nick.alignment = TMPro.TextAlignmentOptions.Left;
             UiBuilderKit.Place(nick, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(112, 18), new Vector2(220, 44));
@@ -71,10 +67,10 @@ namespace NtutAR.UiBuilder
             var toastText = UiBuilderKit.MakeText(toast.transform, "Text", "收集到紀念章!", 32, UiPalette.AccentOrange);
             UiBuilderKit.Stretch((RectTransform)toastText.transform);
 
-            // ---- 罐頭按鈕(下中)+ 圖鑑按鈕(右側) ----
-            var canBtn = UiBuilderKit.MakeRoundButton(safe, "CanButton", "罐頭", 190, UiPalette.AccentOrange);
+            // ---- 罐頭按鈕(下中)+ 圖鑑按鈕(右側),全彩 icon + 玻璃圓底 ----
+            var canBtn = UiBuilderKit.MakeIconButton(safe, "CanButton", UiBuilderKit.Icon("CatCanIcon"), 190, UiPalette.GlassFill);
             UiBuilderKit.Place(canBtn.GetComponent<Image>(), new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 210), new Vector2(190, 190));
-            var bookBtn = UiBuilderKit.MakeRoundButton(safe, "HandbookButton", "手帳", 130, UiPalette.ButtonGreen);
+            var bookBtn = UiBuilderKit.MakeIconButton(safe, "HandbookButton", UiBuilderKit.Icon("HandbookIcon"), 130, UiPalette.GlassFill);
             UiBuilderKit.Place(bookBtn.GetComponent<Image>(), new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(180, 240), new Vector2(130, 130));
 
             // ---- 放置提示(罐頭模式用,接 CatSummonController 的 hint 欄位) ----
