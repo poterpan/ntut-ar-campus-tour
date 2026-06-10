@@ -537,7 +537,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: -980}
+  m_AnchoredPosition: {x: 0, y: -1100}
   m_SizeDelta: {x: 0, y: 1040}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &7673493075522054405
@@ -850,7 +850,7 @@ MonoBehaviour:
   _itemTemplate: {fileID: 5862867296761921184}
   _titleText: {fileID: 5792346667469341752}
   _openY: 0
-  _closedY: -980
+  _closedY: -1100
 --- !u!1 &6546616199908313258
 GameObject:
   m_ObjectHideFlags: 0
@@ -926,7 +926,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 20
 --- !u!114 &348299623429438804
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1103,7 +1103,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 2
 --- !u!114 &1163504806169531125
 MonoBehaviour:
   m_ObjectHideFlags: 0

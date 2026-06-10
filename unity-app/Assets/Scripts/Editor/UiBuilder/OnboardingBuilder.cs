@@ -30,7 +30,7 @@ namespace NtutAR.UiBuilder
             var permBody = UiBuilderKit.MakeText(permission.transform, "Body",
                 "AR 導覽需要透過相機辨識周遭環境,\n並用 GPS 找到你在校園的位置", 30, UiPalette.TextSub);
             UiBuilderKit.Place(permBody, new Vector2(.5f, .5f), new Vector2(.5f, .5f), new Vector2(0, 40), new Vector2(800, 100));
-            var startBtnImg = UiBuilderKit.MakeGlassPanel(permission.transform, "StartButton");
+            var startBtnImg = UiBuilderKit.MakeGlassPanel(permission.transform, "StartButton", 1.8f);
             startBtnImg.color = UiPalette.ButtonGreen;
             UiBuilderKit.Place(startBtnImg, new Vector2(.5f, .5f), new Vector2(.5f, .5f), new Vector2(0, -140), new Vector2(460, 110));
             var startBtn = startBtnImg.gameObject.AddComponent<Button>();

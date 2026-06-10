@@ -20,9 +20,9 @@ namespace NtutAR.UiBuilder
             panelRect.anchorMax = new Vector2(1, 0);
             panelRect.pivot = new Vector2(.5f, 0);
             panelRect.sizeDelta = new Vector2(0, 1040);
-            panelRect.anchoredPosition = new Vector2(0, -980); // 初始收合(closedY)
+            panelRect.anchoredPosition = new Vector2(0, -1100); // 初始收合(closedY,完全藏到螢幕外)
 
-            var grabber = UiBuilderKit.MakeGlassPanel(panel.transform, "Grabber");
+            var grabber = UiBuilderKit.MakeGlassPanel(panel.transform, "Grabber", 20f);
             grabber.color = UiPalette.TextSub;
             UiBuilderKit.Place(grabber, new Vector2(.5f, 1), new Vector2(.5f, 1), new Vector2(0, -16), new Vector2(96, 10));
 
@@ -66,7 +66,7 @@ namespace NtutAR.UiBuilder
             scroll.horizontal = false;
 
             // Item template
-            var item = UiBuilderKit.MakeGlassPanel(content.transform, "ItemTemplate");
+            var item = UiBuilderKit.MakeGlassPanel(content.transform, "ItemTemplate", 2f);
             item.color = UiPalette.CardWhite;
             ((RectTransform)item.transform).sizeDelta = new Vector2(0, 120);
             item.gameObject.AddComponent<LayoutElement>().preferredHeight = 120;
@@ -86,6 +86,7 @@ namespace NtutAR.UiBuilder
 
             var drawer = canvas.AddComponent<PoiDrawerPanel>();
             UnityEditor.Events.UnityEventTools.AddPersistentListener(grabBtn.onClick, drawer.ToggleCached);
+            UiBuilderKit.SetPrivateFloat(drawer, "_closedY", -1100f);
             UiBuilderKit.SetPrivate(drawer, "_panel", panelRect);
             UiBuilderKit.SetPrivate(drawer, "_listRoot", contentRect);
             UiBuilderKit.SetPrivate(drawer, "_itemTemplate", (RectTransform)item.transform);

@@ -16,7 +16,7 @@ namespace NtutAR.UiBuilder
             var hud = canvas.AddComponent<HudController>();
 
             // ---- 玩家狀態列(左上) ----
-            var status = UiBuilderKit.MakeGlassPanel(safe, "PlayerStatus");
+            var status = UiBuilderKit.MakeGlassPanel(safe, "PlayerStatus", 2f);
             UiBuilderKit.Place(status, new Vector2(0, 1), new Vector2(0, 1), new Vector2(24, -24), new Vector2(340, 110));
             var avatar = UiBuilderKit.MakeCircularPhoto(status.transform, "Avatar", UiBuilderKit.Icon("AvatarCat"), 86);
             UiBuilderKit.Place(avatar, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(12, 0), new Vector2(86, 86));
@@ -54,14 +54,14 @@ namespace NtutAR.UiBuilder
             UiBuilderKit.SetPrivate(minimap, "_playerDot", (RectTransform)playerDot.transform);
 
             // ---- 接近提示橫幅(上中) ----
-            var banner = UiBuilderKit.MakeGlassPanel(safe, "ProximityBanner");
+            var banner = UiBuilderKit.MakeGlassPanel(safe, "ProximityBanner", 2.6f);
             UiBuilderKit.Place(banner, new Vector2(.5f, 1), new Vector2(.5f, 1), new Vector2(0, -160), new Vector2(560, 76));
             var bannerGroup = banner.gameObject.AddComponent<CanvasGroup>();
             var bannerText = UiBuilderKit.MakeText(banner.transform, "Text", "紅樓在前方 35m", 30, UiPalette.TextMain);
             UiBuilderKit.Stretch((RectTransform)bannerText.transform);
 
             // ---- 蓋章 Toast(中央偏上) ----
-            var toast = UiBuilderKit.MakeGlassPanel(safe, "StampToast");
+            var toast = UiBuilderKit.MakeGlassPanel(safe, "StampToast", 2.1f);
             UiBuilderKit.Place(toast, new Vector2(.5f, .5f), new Vector2(.5f, .5f), new Vector2(0, 200), new Vector2(640, 96));
             var toastGroup = toast.gameObject.AddComponent<CanvasGroup>();
             var toastText = UiBuilderKit.MakeText(toast.transform, "Text", "收集到紀念章!", 32, UiPalette.AccentOrange);
@@ -71,17 +71,17 @@ namespace NtutAR.UiBuilder
             var canBtn = UiBuilderKit.MakeIconButton(safe, "CanButton", UiBuilderKit.Icon("CatCanIcon"), 190, UiPalette.GlassFill);
             UiBuilderKit.Place(canBtn.GetComponent<Image>(), new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 210), new Vector2(190, 190));
             var bookBtn = UiBuilderKit.MakeIconButton(safe, "HandbookButton", UiBuilderKit.Icon("HandbookIcon"), 130, UiPalette.GlassFill);
-            UiBuilderKit.Place(bookBtn.GetComponent<Image>(), new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(180, 240), new Vector2(130, 130));
+            UiBuilderKit.Place(bookBtn.GetComponent<Image>(), new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(255, 245), new Vector2(130, 130));
 
             // ---- 放置提示(罐頭模式用,接 CatSummonController 的 hint 欄位) ----
-            var hint = UiBuilderKit.MakeGlassPanel(safe, "PlacementHint");
+            var hint = UiBuilderKit.MakeGlassPanel(safe, "PlacementHint", 2.8f);
             UiBuilderKit.Place(hint, new Vector2(.5f, 1), new Vector2(.5f, 1), new Vector2(0, -260), new Vector2(520, 70));
             var hintText = UiBuilderKit.MakeText(hint.transform, "Text", "點擊地面放置罐頭", 30, UiPalette.TextMain);
             UiBuilderKit.Stretch((RectTransform)hintText.transform);
             hint.gameObject.SetActive(false);
 
             // ---- 抽屜把手(底部,橫向撐滿;面板本體為 PoiDrawer.prefab,把手按鈕由 UiRoot 接線) ----
-            var handle = UiBuilderKit.MakeGlassPanel(safe, "DrawerHandle");
+            var handle = UiBuilderKit.MakeGlassPanel(safe, "DrawerHandle", 1.5f);
             var handleRect = (RectTransform)handle.transform;
             handleRect.anchorMin = new Vector2(0, 0);
             handleRect.anchorMax = new Vector2(1, 0);

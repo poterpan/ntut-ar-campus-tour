@@ -178,13 +178,15 @@ namespace NtutAR.UiBuilder
             return rect;
         }
 
-        public static Image MakeGlassPanel(Transform parent, string name)
+        /// <param name="cornerScale">圓角縮放:1 = 96px 大圓角(大面板),2 = 48px(小元件;corner 大於半高會被擠壓變尖)</param>
+        public static Image MakeGlassPanel(Transform parent, string name, float cornerScale = 1f)
         {
             var go = new GameObject(name, typeof(RectTransform));
             go.transform.SetParent(parent, false);
             var img = go.AddComponent<Image>();
             img.sprite = RoundedSprite;
             img.type = Image.Type.Sliced;
+            img.pixelsPerUnitMultiplier = cornerScale;
             img.color = UiPalette.GlassFill;
             var shadow = go.AddComponent<Shadow>();
             shadow.effectColor = new Color(0.365f, 0.251f, 0.216f, 0.18f); // #5D4037 @18%
@@ -245,6 +247,13 @@ namespace NtutAR.UiBuilder
         {
             var so = new SerializedObject(target);
             so.FindProperty(field).objectReferenceValue = value;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        public static void SetPrivateFloat(Object target, string field, float value)
+        {
+            var so = new SerializedObject(target);
+            so.FindProperty(field).floatValue = value;
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
