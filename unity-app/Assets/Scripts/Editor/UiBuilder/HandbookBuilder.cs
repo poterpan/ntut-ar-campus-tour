@@ -55,7 +55,7 @@ namespace NtutAR.UiBuilder
             // 餵貓計數 + 關閉鈕
             var feed = UiBuilderKit.MakeText(bg.transform, "FeedCount", "已餵食校園貓 0 次", 28, UiPalette.TextSub);
             UiBuilderKit.Place(feed, new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 160), new Vector2(700, 40));
-            var closeBtn = UiBuilderKit.MakeRoundButton(bg.transform, "CloseButton", "關", 110, UiPalette.ButtonGreen);
+            var closeBtn = UiBuilderKit.MakeCloseButton(bg.transform, "CloseButton", 110);
             UiBuilderKit.Place(closeBtn.GetComponent<Image>(), new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 40), new Vector2(110, 110));
 
             var panel = canvas.AddComponent<HandbookPanel>();

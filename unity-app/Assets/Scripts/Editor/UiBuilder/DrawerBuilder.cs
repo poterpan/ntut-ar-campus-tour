@@ -58,6 +58,7 @@ namespace NtutAR.UiBuilder
             contentRect.anchorMin = new Vector2(0, 1);
             contentRect.anchorMax = new Vector2(1, 1);
             contentRect.pivot = new Vector2(.5f, 1);
+            contentRect.sizeDelta = Vector2.zero;   // 新建 RectTransform 預設 100x100,不歸零會比視口寬(左緣裁切根因)
             var layout = content.AddComponent<VerticalLayoutGroup>();
             layout.padding = new RectOffset(16, 16, 8, 8);
             layout.spacing = 14;

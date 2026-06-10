@@ -114,6 +114,32 @@ namespace NtutAR.UiBuilder
             return btn;
         }
 
+        /// <summary>關閉鈕:綠圓 + 白色叉叉(兩條旋轉細槓,不依賴字型字形)。</summary>
+        public static Button MakeCloseButton(Transform parent, string name, float diameter)
+        {
+            var img = MakeGlassPanel(parent, name);
+            img.sprite = CircleSprite;
+            img.type = Image.Type.Simple;
+            img.color = UiPalette.ButtonGreen;
+            img.raycastTarget = true;
+            ((RectTransform)img.transform).sizeDelta = new Vector2(diameter, diameter);
+            var btn = img.gameObject.AddComponent<Button>();
+
+            for (int i = 0; i < 2; i++)
+            {
+                var bar = new GameObject(i == 0 ? "BarA" : "BarB", typeof(RectTransform));
+                bar.transform.SetParent(img.transform, false);
+                var barImg = bar.AddComponent<Image>();
+                barImg.color = Color.white;
+                barImg.raycastTarget = false;
+                var rect = (RectTransform)bar.transform;
+                rect.anchorMin = rect.anchorMax = new Vector2(.5f, .5f);
+                rect.sizeDelta = new Vector2(diameter * 0.46f, diameter * 0.07f);
+                rect.localRotation = Quaternion.Euler(0, 0, i == 0 ? 45 : -45);
+            }
+            return btn;
+        }
+
         /// <summary>圓形遮罩照片(頭像/Logo):圓 sprite 當 Mask,子物件放方形照片。</summary>
         public static Image MakeCircularPhoto(Transform parent, string name, Sprite photo, float diameter)
         {

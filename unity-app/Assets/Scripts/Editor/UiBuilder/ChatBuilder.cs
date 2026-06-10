@@ -34,14 +34,14 @@ namespace NtutAR.UiBuilder
             badge.sprite = UiBuilderKit.CircleSprite; badge.type = Image.Type.Simple;
             badge.color = UiPalette.ButtonGreen;
             UiBuilderKit.Place(badge, new Vector2(0, 1), new Vector2(0, 1), new Vector2(30, -24), new Vector2(72, 72));
-            var badgeChar = UiBuilderKit.MakeText(badge.transform, "Char", "導", 34, Color.white);
+            var badgeChar = UiBuilderKit.MakeText(badge.transform, "Char", "黃", 34, Color.white);
             UiBuilderKit.Stretch((RectTransform)badgeChar.transform);
-            var npcName = UiBuilderKit.MakeText(panel.transform, "NpcName", "小導 · 校園導遊", 30, UiPalette.TextMain);
+            var npcName = UiBuilderKit.MakeText(panel.transform, "NpcName", "老黃 · 校園導遊", 30, UiPalette.TextMain);
             npcName.alignment = TextAlignmentOptions.Left;
             UiBuilderKit.Place(npcName, new Vector2(0, 1), new Vector2(0, 1), new Vector2(118, -38), new Vector2(500, 44));
 
             // ---- 關閉鈕(右上) ----
-            var closeBtn = UiBuilderKit.MakeRoundButton(panel.transform, "CloseButton", "關", 84, UiPalette.ButtonGreen);
+            var closeBtn = UiBuilderKit.MakeCloseButton(panel.transform, "CloseButton", 84);
             UiBuilderKit.Place(closeBtn.GetComponent<Image>(), new Vector2(1, 1), new Vector2(1, 1), new Vector2(-30, -18), new Vector2(84, 84));
 
             // ---- 訊息捲動區 ----
@@ -60,6 +60,7 @@ namespace NtutAR.UiBuilder
             contentRect.anchorMin = new Vector2(0, 0);
             contentRect.anchorMax = new Vector2(1, 0);
             contentRect.pivot = new Vector2(.5f, 0);              // 釘在底:新訊息永遠看得到
+            contentRect.sizeDelta = Vector2.zero;                  // 新建 RectTransform 預設 100x100,不歸零會比視口寬
             var layout = content.AddComponent<VerticalLayoutGroup>();
             layout.padding = new RectOffset(8, 8, 8, 8);
             layout.spacing = 16;
@@ -128,22 +129,30 @@ namespace NtutAR.UiBuilder
             UiBuilderKit.SavePrefab(canvas.gameObject, "Assets/Prefabs/Ui/GuideChat.prefab");
         }
 
-        /// <summary>訊息泡泡:白底圓角 + 深色文字,高度隨內容。</summary>
+        /// <summary>訊息泡泡:白底圓角 + 深色文字,高度隨內容。
+        /// 結構:根(空 RectTransform + VLG)/ Bg(Image,ignoreLayout)/ Text。
+        /// Image 與 LayoutGroup 同物件時,Image 會用 sprite 原始尺寸(256px)參與
+        /// preferred 計算,泡泡被撐成固定高;Bg 設 ignoreLayout 即可讓文字主導高度。</summary>
         private static GameObject BuildMessagePrefab()
         {
-            var bubble = UiBuilderKit.MakeGlassPanel(null, "ChatMessage", 2.4f);
-            bubble.color = new Color(1f, 1f, 1f, 0.95f);
-            var layout = bubble.gameObject.AddComponent<VerticalLayoutGroup>();
+            var root = new GameObject("ChatMessage", typeof(RectTransform));
+            var layout = root.AddComponent<VerticalLayoutGroup>();
             layout.padding = new RectOffset(24, 24, 16, 16);
             layout.childForceExpandHeight = false;
             layout.childControlHeight = true;
             layout.childControlWidth = true;
-            var text = UiBuilderKit.MakeText(bubble.transform, "Text", "訊息", 30, UiPalette.TextMain);
+
+            var bg = UiBuilderKit.MakeGlassPanel(root.transform, "Bg", 2.4f);
+            bg.color = new Color(1f, 1f, 1f, 0.95f);
+            UiBuilderKit.Stretch((RectTransform)bg.transform);
+            bg.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
+
+            var text = UiBuilderKit.MakeText(root.transform, "Text", "訊息", 30, UiPalette.TextMain);
             text.alignment = TextAlignmentOptions.TopLeft;
             text.enableWordWrapping = true;
 
-            PrefabUtility.SaveAsPrefabAsset(bubble.gameObject, "Assets/Prefabs/Ui/ChatMessage.prefab");
-            Object.DestroyImmediate(bubble.gameObject);
+            PrefabUtility.SaveAsPrefabAsset(root, "Assets/Prefabs/Ui/ChatMessage.prefab");
+            Object.DestroyImmediate(root);
             return AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Ui/ChatMessage.prefab");
         }
     }
