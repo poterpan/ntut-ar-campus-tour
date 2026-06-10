@@ -24,6 +24,9 @@ namespace NtutAR.Ui
 
         public bool IsOpen => _open;
 
+        /// <summary>開合狀態變化(true=開啟)。UiRoot 用來同步隱藏 HUD 把手。</summary>
+        public event System.Action<bool> OpenChanged;
+
         /// <summary>抽屜自身的收合鈕用(打開後把手被面板蓋住,需由面板上的把手收合)</summary>
         public void ToggleCached()
         {
@@ -38,6 +41,7 @@ namespace NtutAR.Ui
             if (_open) Rebuild(pois, exploration);
             StopAllCoroutines();
             StartCoroutine(UiTween.SlideAnchored(_panel, new Vector2(0, _open ? _openY : _closedY), 0.35f));
+            OpenChanged?.Invoke(_open);
         }
 
         public void UpdateGeo(double lat, double lng) { _lat = lat; _lng = lng; _hasGeo = true; }

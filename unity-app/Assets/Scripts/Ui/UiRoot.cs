@@ -35,6 +35,8 @@ namespace NtutAR.Ui
 
             _drawerHandle.onClick.AddListener(() => _drawer.Toggle(_poiService, _hud.Exploration));
             _hud.GeoUpdated += _drawer.UpdateGeo;
+            // 抽屜開啟時把手沒有作用(被面板蓋住),直接隱藏避免從半透明面板透出
+            _drawer.OpenChanged += open => _drawerHandle.gameObject.SetActive(!open);
             _handbookButton.onClick.AddListener(() => _handbook.Open(_poiService, _hud.Exploration));
             if (_catSummon != null)
                 _catSummon.CatFed += () => _hud.Exploration.IncrementFeedCount();

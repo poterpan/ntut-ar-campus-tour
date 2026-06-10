@@ -80,17 +80,19 @@ namespace NtutAR.UiBuilder
             UiBuilderKit.Stretch((RectTransform)hintText.transform);
             hint.gameObject.SetActive(false);
 
-            // ---- 抽屜把手(底部,橫向撐滿;面板本體為 PoiDrawer.prefab,把手按鈕由 UiRoot 接線) ----
-            var handle = UiBuilderKit.MakeGlassPanel(safe, "DrawerHandle", 1.5f);
+            // ---- 抽屜把手(底部,橫向撐滿;掛 canvas 根全幅出血,下緣圓角推出螢幕外 = 平底,與抽屜一致) ----
+            var handle = UiBuilderKit.MakeGlassPanel(canvas.transform, "DrawerHandle", 1.5f);
             var handleRect = (RectTransform)handle.transform;
             handleRect.anchorMin = new Vector2(0, 0);
             handleRect.anchorMax = new Vector2(1, 0);
             handleRect.pivot = new Vector2(.5f, 0);
-            handleRect.sizeDelta = new Vector2(0, 140);
-            handleRect.anchoredPosition = Vector2.zero;
+            handleRect.sizeDelta = new Vector2(0, 240);          // 下方 100 推出螢幕外
+            handleRect.anchoredPosition = new Vector2(0, -100);
             handle.gameObject.AddComponent<Button>();
             var handleText = UiBuilderKit.MakeText(handle.transform, "Text", "︿ 校園景點", 28, UiPalette.TextSub);
-            UiBuilderKit.Stretch((RectTransform)handleText.transform);
+            var handleTextRect = (RectTransform)handleText.transform;
+            UiBuilderKit.Stretch(handleTextRect);
+            handleTextRect.offsetMin = new Vector2(0, 100);      // 文字置中於可見的上半段
 
             // ---- 貓召喚 controller 掛同物件,接 HUD 的按鈕/提示 ----
             var summon = canvas.AddComponent<NtutAR.Cat.CatSummonController>();
