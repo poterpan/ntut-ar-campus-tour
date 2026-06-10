@@ -72,6 +72,30 @@ namespace NtutAR.Guide
             ShowNpc(poi);
         }
 
+        /// <summary>隱藏測試開關用(連點玩家狀態列觸發):不經 anchor,直接把 NPC 召喚到鏡頭前方,
+        /// 讓不在 POI 現場時也能測對話流程。POI 內容取 debugPoiId(預設 p01)。</summary>
+        public void DebugSummonNpc()
+        {
+            if (_poiService == null || _arCamera == null || _npcPrefab == null) return;
+            if (!_poiService.TryGetById(_debugPoiId, out var poi))
+            {
+                if (_poiService.All.Count == 0) return;
+                poi = _poiService.All[0];
+            }
+            _activePoi = poi;
+
+            if (_npcInstance != null) Destroy(_npcInstance);
+            var cam = _arCamera.transform;
+            var forward = Vector3.ProjectOnPlane(cam.forward, Vector3.up).normalized;
+            if (forward.sqrMagnitude < 0.001f) forward = Vector3.forward;
+            var pos = cam.position + forward * 2f;
+            pos.y = cam.position.y - 1.3f;   // 概略地面高度(鏡頭下方 1.3m)
+            _npcInstance = Instantiate(_npcPrefab, pos, Quaternion.identity);
+            _npcAnimator = _npcInstance.GetComponentInChildren<NpcAnimator>();
+            FaceCamera();
+            Debug.Log($"[Guide] Debug 召喚 NPC(poi={poi.id},不經 anchor)");
+        }
+
         private void FaceCamera()
         {
             if (_arCamera == null || _npcInstance == null) return;

@@ -58,6 +58,7 @@ namespace NtutAR.UiBuilder
             contentRect.anchorMax = new Vector2(1, 1);
             contentRect.pivot = new Vector2(.5f, 1);
             var layout = content.AddComponent<VerticalLayoutGroup>();
+            layout.padding = new RectOffset(16, 16, 8, 8);
             layout.spacing = 14;
             layout.childForceExpandHeight = false;
             layout.childControlHeight = false;

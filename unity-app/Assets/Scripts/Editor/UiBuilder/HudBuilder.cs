@@ -18,6 +18,8 @@ namespace NtutAR.UiBuilder
             // ---- 玩家狀態列(左上) ----
             var status = UiBuilderKit.MakeGlassPanel(safe, "PlayerStatus", 2f);
             UiBuilderKit.Place(status, new Vector2(0, 1), new Vector2(0, 1), new Vector2(24, -24), new Vector2(340, 110));
+            var statusBtn = status.gameObject.AddComponent<Button>();
+            statusBtn.transition = Selectable.Transition.None;   // 隱藏開關:連點 5 下召喚 NPC(UiRoot 接線)
             var avatar = UiBuilderKit.MakeCircularPhoto(status.transform, "Avatar", UiBuilderKit.Icon("AvatarCat"), 86);
             UiBuilderKit.Place(avatar, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(12, 0), new Vector2(86, 86));
             var nick = UiBuilderKit.MakeText(status.transform, "Nickname", "探索者", 34, UiPalette.TextMain);

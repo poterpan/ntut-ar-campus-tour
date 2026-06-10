@@ -19,6 +19,12 @@ namespace NtutAR.Ui
         [Tooltip("可空;有開場流程時,HUD 會隱藏到開場結束才淡入")]
         [SerializeField] private OnboardingController _onboarding;
         [SerializeField] private CanvasGroup _hudGroup;
+        [Header("隱藏測試開關(連點玩家狀態列 5 下召喚 NPC;皆可空)")]
+        [SerializeField] private Button _statusButton;
+        [SerializeField] private NtutAR.Guide.GuideInteractionController _guide;
+
+        private int _debugTapCount;
+        private float _lastDebugTapTime;
 
         private void Start()
         {
@@ -40,6 +46,21 @@ namespace NtutAR.Ui
             _handbookButton.onClick.AddListener(() => _handbook.Open(_poiService, _hud.Exploration));
             if (_catSummon != null)
                 _catSummon.CatFed += () => _hud.Exploration.IncrementFeedCount();
+
+            if (_statusButton != null && _guide != null)
+                _statusButton.onClick.AddListener(OnStatusTapped);
+        }
+
+        /// <summary>連點 5 下(間隔 < 0.6s)觸發 debug 召喚 NPC。</summary>
+        private void OnStatusTapped()
+        {
+            _debugTapCount = (Time.unscaledTime - _lastDebugTapTime < 0.6f) ? _debugTapCount + 1 : 1;
+            _lastDebugTapTime = Time.unscaledTime;
+            if (_debugTapCount >= 5)
+            {
+                _debugTapCount = 0;
+                _guide.DebugSummonNpc();
+            }
         }
     }
 }
