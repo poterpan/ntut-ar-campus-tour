@@ -123,24 +123,6 @@ jobs:
             echo "::notice::Podfile 不存在(ARCore Cloud Anchor 已關 / 套件用 SPM),跳過 pod install,改走 .xcodeproj"
           fi
 
-      - name: Install App Store Connect API Key
-        env:
-          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
-          APPSTORE_PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
-        run: |
-          mkdir -p ~/.appstoreconnect/private_keys
-          KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${APPSTORE_KEY_ID}.p8"
-          # printf %s + tr -d '\r':避免額外換行 + 清除 CRLF(GitHub Secret 偶會帶 \r)
-          printf '%s\n' "$APPSTORE_PRIVATE_KEY" | tr -d '\r' > "$KEY_PATH"
-          chmod 600 "$KEY_PATH"
-          # 診斷:確認 PEM 結構正確(若還是 fail 可看下次 log)
-          echo "--- API Key diagnostics ---"
-          echo "Size: $(wc -c < "$KEY_PATH") bytes"
-          echo "Lines: $(wc -l < "$KEY_PATH")"
-          echo "First line: $(head -1 "$KEY_PATH")"
-          echo "Last line: $(tail -1 "$KEY_PATH")"
-          echo "Has CR? $(grep -c $'\r' "$KEY_PATH" 2>/dev/null || echo 0)"
-
       - name: Create ExportOptions.plist
         env:
           TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
@@ -160,6 +142,8 @@ jobs:
               <string>${TEAM_ID}</string>
               <key>signingStyle</key>
               <string>manual</string>
+              <key>signingCertificate</key>
+              <string>Apple Distribution</string>
               <key>provisioningProfiles</key>
               <dict>
                   <key>${BUNDLE_ID}</key>
@@ -179,10 +163,6 @@ jobs:
 
       - name: Build archive (.xcarchive)
         working-directory: build/iOS/unity-app  # game-ci 預設輸出位置:<buildsPath>/<targetPlatform>/<buildName>
-        env:
-          TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
-          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
-          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
         run: |
           # 智能選 workspace / project:有 .xcworkspace 用之(CocoaPods),否則 .xcodeproj
           if [ -d "Unity-iPhone.xcworkspace" ]; then
@@ -196,34 +176,27 @@ jobs:
             ls -la
             exit 1
           fi
-          # Automatic signing + API Key 驗證:子 Swift Package 不會被全域 PROVISIONING_PROFILE 誤套
+          # archive 階段不簽名,簽名統一由 Export IPA 用 manual ExportOptions 處理:
+          # - 不能用 Automatic + allowProvisioningUpdates:每個 runner 都是新 keychain,
+          #   Xcode 會在 Apple 帳號上每次新建一張 Development 憑證,直到撐爆帳號上限
+          # - 也不在這裡全域塞 PROVISIONING_PROFILE:會誤套到 UnityFramework 等子 target
           xcodebuild "${PROJECT_FLAG[@]}" \
             -scheme Unity-iPhone \
             -configuration Release \
             -sdk iphoneos \
             -archivePath "$GITHUB_WORKSPACE/build/unity-app.xcarchive" \
-            -allowProvisioningUpdates \
-            -authenticationKeyID "$APPSTORE_KEY_ID" \
-            -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${APPSTORE_KEY_ID}.p8" \
-            -authenticationKeyIssuerID "$APPSTORE_ISSUER_ID" \
             archive \
-            DEVELOPMENT_TEAM="$TEAM_ID" \
-            CODE_SIGN_STYLE=Automatic
+            CODE_SIGNING_ALLOWED=NO
 
       - name: Export IPA
         id: export
-        env:
-          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
-          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
         run: |
+          # manual signing:cert(.p12)+ profile 都已裝在 runner 上,
+          # 不需要也不可以 -allowProvisioningUpdates(避免再連 Apple API 建憑證)
           xcodebuild -exportArchive \
             -archivePath "$GITHUB_WORKSPACE/build/unity-app.xcarchive" \
             -exportPath "$GITHUB_WORKSPACE/build/export" \
-            -exportOptionsPlist "$GITHUB_WORKSPACE/ExportOptions.plist" \
-            -allowProvisioningUpdates \
-            -authenticationKeyID "$APPSTORE_KEY_ID" \
-            -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${APPSTORE_KEY_ID}.p8" \
-            -authenticationKeyIssuerID "$APPSTORE_ISSUER_ID"
+            -exportOptionsPlist "$GITHUB_WORKSPACE/ExportOptions.plist"
           # 找實際 IPA(Unity Product Name 不一定等於 buildName)
           IPA=$(find "$GITHUB_WORKSPACE/build/export" -maxdepth 1 -name "*.ipa" -print -quit)
           if [ -z "$IPA" ]; then
