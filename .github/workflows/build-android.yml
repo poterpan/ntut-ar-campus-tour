@@ -95,7 +95,11 @@ jobs:
           targetPlatform: Android
           buildName: unity-app
           buildsPath: build
-          versioning: Semantic
+          # None:跟 iOS workflow 一致,用 Unity Player Settings 的 bundleVersion。
+          # Semantic 會基於 git working tree 算版號,但上面 vendor step 已改動
+          # manifest/lock → "Branch is dirty. Refusing to base semantic version
+          # on uncommitted changes" 直接拒絕 build。
+          versioning: None
 
       - name: Upload APK as artifact
         if: always()
