@@ -49,14 +49,20 @@ namespace NtutAR.Guide
             if (!TryGetTapRay(out var ray)) return;
             // RaycastAll:室內測試時 AR 平面(桌面等)的 collider 會擋在 NPC 前面,
             // 單發 Raycast 打到平面就停;只要路徑上有 NPC 就算點到
-            foreach (var hit in Physics.RaycastAll(ray, 100f))
+            var hits = Physics.RaycastAll(ray, 100f);
+            bool hitNpc = false;
+            foreach (var hit in hits)
             {
                 if (hit.collider.transform.IsChildOf(_npcInstance.transform))
                 {
+                    hitNpc = true;
                     OpenChat();
                     break;
                 }
             }
+            // 實機診斷用(Xcode console 可見):記錄每次點擊打到了什麼
+            Debug.Log($"[Guide] tap hits={hits.Length} npc={hitNpc} " +
+                      string.Join(",", System.Array.ConvertAll(hits, h => h.collider.name)));
         }
 
         private void ShowNpc(NtutAR.Poi.Poi poi)
@@ -102,6 +108,15 @@ namespace NtutAR.Guide
             _npcAnimator = _npcInstance.GetComponentInChildren<NpcAnimator>();
             FaceCamera();
             Debug.Log($"[Guide] Debug 召喚 NPC(poi={poi.id},不經 anchor)");
+            // 1.5 秒後自動開對話:把「對話面板/層級」與「點擊判定」兩個問題切開,
+            // 點擊判定若有問題,至少對話流程先可測
+            StartCoroutine(DebugAutoOpenChat());
+        }
+
+        private System.Collections.IEnumerator DebugAutoOpenChat()
+        {
+            yield return new WaitForSeconds(1.5f);
+            if (_npcInstance != null) OpenChat();
         }
 
         private void FaceCamera()

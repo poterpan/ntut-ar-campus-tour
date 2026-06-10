@@ -22,6 +22,8 @@ namespace NtutAR.Geo
             _next = Time.time + _checkInterval;
 
             if (_earthManager == null || _poiService == null || _anchorManager == null || _guide == null) return;
+            // AR Session 未啟動時(Editor)getter 會拋 NRE
+            if (!_earthManager.isActiveAndEnabled) return;
             if (_earthManager.EarthTrackingState != UnityEngine.XR.ARSubsystems.TrackingState.Tracking) return;
 
             var pose = _earthManager.CameraGeospatialPose;
