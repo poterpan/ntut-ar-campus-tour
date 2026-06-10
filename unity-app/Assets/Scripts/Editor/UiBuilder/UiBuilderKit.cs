@@ -96,6 +96,7 @@ namespace NtutAR.UiBuilder
             img.sprite = CircleSprite;
             img.type = Image.Type.Simple;
             img.color = bgFill;
+            img.raycastTarget = true;    // 按鈕需要接收點擊
             ((RectTransform)img.transform).sizeDelta = new Vector2(diameter, diameter);
             var btn = img.gameObject.AddComponent<Button>();
 
@@ -188,6 +189,9 @@ namespace NtutAR.UiBuilder
             img.type = Image.Type.Sliced;
             img.pixelsPerUnitMultiplier = cornerScale;
             img.color = UiPalette.GlassFill;
+            // 預設不擋點擊(裝飾性面板;隱形的橫幅/toast 曾擋住 AR 點擊)。
+            // 互動元件(按鈕/需要擋住背後的全屏面板)由呼叫端顯式開回 true。
+            img.raycastTarget = false;
             var shadow = go.AddComponent<Shadow>();
             shadow.effectColor = new Color(0.365f, 0.251f, 0.216f, 0.18f); // #5D4037 @18%
             shadow.effectDistance = new Vector2(0, -3);
@@ -205,6 +209,7 @@ namespace NtutAR.UiBuilder
             tmp.fontSize = size;
             tmp.color = color;
             tmp.alignment = TextAlignmentOptions.Center;
+            tmp.raycastTarget = false;   // 文字一律不擋點擊
             return tmp;
         }
 
@@ -215,6 +220,7 @@ namespace NtutAR.UiBuilder
             img.sprite = CircleSprite;
             img.type = Image.Type.Simple;
             img.color = fill;
+            img.raycastTarget = true;    // 按鈕需要接收點擊
             var rect = (RectTransform)img.transform;
             rect.sizeDelta = new Vector2(diameter, diameter);
             var btn = img.gameObject.AddComponent<Button>();

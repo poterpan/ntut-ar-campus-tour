@@ -17,6 +17,7 @@ namespace NtutAR.UiBuilder
             // 暖色全屏底
             var bg = UiBuilderKit.MakeGlassPanel(safe, "Background");
             bg.color = UiPalette.WarmBgTop;
+            bg.raycastTarget = true;   // 全屏頁要擋住背後
             UiBuilderKit.Stretch((RectTransform)bg.transform);
 
             var title = UiBuilderKit.MakeText(bg.transform, "Title", "探索手帳", 52, UiPalette.TextMain, title: true);

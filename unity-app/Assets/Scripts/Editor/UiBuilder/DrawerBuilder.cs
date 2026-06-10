@@ -15,6 +15,7 @@ namespace NtutAR.UiBuilder
 
             // 面板掛 canvas 根並橫向撐滿(出血到螢幕左右與底邊;固定寬 1080 在窄機型會超出螢幕)
             var panel = UiBuilderKit.MakeGlassPanel(canvas.transform, "Panel");
+            panel.raycastTarget = true;   // 開啟時要擋住背後的 AR 點擊
             var panelRect = (RectTransform)panel.transform;
             panelRect.anchorMin = new Vector2(0, 0);
             panelRect.anchorMax = new Vector2(1, 0);

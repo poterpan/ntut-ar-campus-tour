@@ -18,6 +18,7 @@ namespace NtutAR.UiBuilder
             // ---- 玩家狀態列(左上) ----
             var status = UiBuilderKit.MakeGlassPanel(safe, "PlayerStatus", 2f);
             UiBuilderKit.Place(status, new Vector2(0, 1), new Vector2(0, 1), new Vector2(24, -24), new Vector2(340, 110));
+            status.raycastTarget = true;   // 隱藏開關按鈕
             var statusBtn = status.gameObject.AddComponent<Button>();
             statusBtn.transition = Selectable.Transition.None;   // 隱藏開關:連點 5 下召喚 NPC(UiRoot 接線)
             var avatar = UiBuilderKit.MakeCircularPhoto(status.transform, "Avatar", UiBuilderKit.Icon("AvatarCat"), 86);
@@ -90,6 +91,7 @@ namespace NtutAR.UiBuilder
             handleRect.pivot = new Vector2(.5f, 0);
             handleRect.sizeDelta = new Vector2(0, 240);          // 下方 100 推出螢幕外
             handleRect.anchoredPosition = new Vector2(0, -100);
+            handle.raycastTarget = true;   // 把手按鈕
             handle.gameObject.AddComponent<Button>();
             var handleText = UiBuilderKit.MakeText(handle.transform, "Text", "︿ 校園景點", 28, UiPalette.TextSub);
             var handleTextRect = (RectTransform)handleText.transform;

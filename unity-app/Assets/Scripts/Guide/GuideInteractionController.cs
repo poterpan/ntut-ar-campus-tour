@@ -47,8 +47,16 @@ namespace NtutAR.Guide
         {
             if (_npcInstance == null) return;
             if (!TryGetTapRay(out var ray)) return;
-            if (Physics.Raycast(ray, out var hit) && hit.collider.transform.IsChildOf(_npcInstance.transform))
-                OpenChat();
+            // RaycastAll:室內測試時 AR 平面(桌面等)的 collider 會擋在 NPC 前面,
+            // 單發 Raycast 打到平面就停;只要路徑上有 NPC 就算點到
+            foreach (var hit in Physics.RaycastAll(ray, 100f))
+            {
+                if (hit.collider.transform.IsChildOf(_npcInstance.transform))
+                {
+                    OpenChat();
+                    break;
+                }
+            }
         }
 
         private void ShowNpc(NtutAR.Poi.Poi poi)

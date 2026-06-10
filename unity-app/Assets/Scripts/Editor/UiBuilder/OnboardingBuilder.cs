@@ -33,6 +33,7 @@ namespace NtutAR.UiBuilder
             var startBtnImg = UiBuilderKit.MakeGlassPanel(permission.transform, "StartButton", 1.8f);
             startBtnImg.color = UiPalette.ButtonGreen;
             UiBuilderKit.Place(startBtnImg, new Vector2(.5f, .5f), new Vector2(.5f, .5f), new Vector2(0, -140), new Vector2(460, 110));
+            startBtnImg.raycastTarget = true;
             var startBtn = startBtnImg.gameObject.AddComponent<Button>();
             var startLabel = UiBuilderKit.MakeText(startBtnImg.transform, "Label", "好,開始吧", 36, Color.white);
             UiBuilderKit.Stretch((RectTransform)startLabel.transform);
@@ -76,6 +77,7 @@ namespace NtutAR.UiBuilder
             {
                 var bg = UiBuilderKit.MakeGlassPanel(go.transform, "Bg");
                 bg.color = UiPalette.WarmBgTop;
+                bg.raycastTarget = true;   // 全屏底要擋住背後
                 UiBuilderKit.Stretch((RectTransform)bg.transform);
                 bg.transform.SetAsFirstSibling();
             }
