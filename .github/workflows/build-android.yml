@@ -9,6 +9,10 @@ on:
   #     - 'unity-app/**'
   #     - '.github/workflows/build-android.yml'
 
+# action-gh-release 需要 contents: write 才能建 Release(GITHUB_TOKEN 預設唯讀 → 403)
+permissions:
+  contents: write
+
 concurrency:
   group: build-android-${{ github.ref }}
   cancel-in-progress: true
@@ -20,7 +24,8 @@ jobs:
   build:
     name: Unity Android APK
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # 冷 cache 全程實測 ~60 分鐘(run 27263237632 跑了 59m37s),60 太緊
+    timeout-minutes: 90
     steps:
       - name: Checkout
         uses: actions/checkout@v4
