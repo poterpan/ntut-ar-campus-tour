@@ -12,26 +12,35 @@ namespace NtutAR.UiBuilder
         {
             var canvas = UiBuilderKit.MakeCanvas("Handbook", 20);
             var group = canvas.AddComponent<CanvasGroup>();
-            var safe = UiBuilderKit.MakeSafeArea(canvas);
 
-            // 暖色全屏底
-            var bg = UiBuilderKit.MakeGlassPanel(safe, "Background");
+            // 半透明暗背景(全幅出血,點擊外圍可關閉)
+            var backdrop = new GameObject("Backdrop", typeof(RectTransform));
+            backdrop.transform.SetParent(canvas.transform, false);
+            UiBuilderKit.Stretch((RectTransform)backdrop.transform);
+            var backdropImg = backdrop.AddComponent<Image>();
+            backdropImg.color = new Color(0.2f, 0.14f, 0.1f, 0.45f);
+            backdropImg.raycastTarget = true;
+            var backdropBtn = backdrop.AddComponent<Button>();
+            backdropBtn.transition = Selectable.Transition.None;
+
+            // 置中彈出卡片(5 枚徽章不需要全螢幕 sheet)
+            var bg = UiBuilderKit.MakeGlassPanel(canvas.transform, "Card");
             bg.color = UiPalette.WarmBgTop;
-            bg.raycastTarget = true;   // 全屏頁要擋住背後
-            UiBuilderKit.Stretch((RectTransform)bg.transform);
+            bg.raycastTarget = true;
+            UiBuilderKit.Place(bg, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.zero, new Vector2(960, 1240));
 
-            var title = UiBuilderKit.MakeText(bg.transform, "Title", "探索手帳", 52, UiPalette.TextMain, title: true);
-            UiBuilderKit.Place(title, new Vector2(.5f, 1), new Vector2(.5f, 1), new Vector2(0, -90), new Vector2(700, 70));
+            var title = UiBuilderKit.MakeText(bg.transform, "Title", "探索手帳", 48, UiPalette.TextMain, title: true);
+            UiBuilderKit.Place(title, new Vector2(.5f, 1), new Vector2(.5f, 1), new Vector2(0, -56), new Vector2(700, 64));
             var summary = UiBuilderKit.MakeText(bg.transform, "Summary", "收集 0 / 8 枚紀念章", 28, UiPalette.TextSub);
-            UiBuilderKit.Place(summary, new Vector2(.5f, 1), new Vector2(.5f, 1), new Vector2(0, -160), new Vector2(700, 40));
+            UiBuilderKit.Place(summary, new Vector2(.5f, 1), new Vector2(.5f, 1), new Vector2(0, -120), new Vector2(700, 40));
 
-            // 章格 grid
+            // 章格 grid(3x2)
             var gridGo = new GameObject("Grid", typeof(RectTransform));
             gridGo.transform.SetParent(bg.transform, false);
             var grid = gridGo.AddComponent<GridLayoutGroup>();
-            UiBuilderKit.Place(grid, new Vector2(.5f, 1), new Vector2(.5f, 1), new Vector2(0, -220), new Vector2(960, 1100));
-            grid.cellSize = new Vector2(280, 300);
-            grid.spacing = new Vector2(40, 30);
+            UiBuilderKit.Place(grid, new Vector2(.5f, 1), new Vector2(.5f, 1), new Vector2(0, -170), new Vector2(880, 700));
+            grid.cellSize = new Vector2(270, 300);
+            grid.spacing = new Vector2(30, 30);
             grid.childAlignment = TextAnchor.UpperCenter;
 
             // 章 template
@@ -54,9 +63,9 @@ namespace NtutAR.UiBuilder
 
             // 餵貓計數 + 關閉鈕
             var feed = UiBuilderKit.MakeText(bg.transform, "FeedCount", "已餵食校園貓 0 次", 28, UiPalette.TextSub);
-            UiBuilderKit.Place(feed, new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 160), new Vector2(700, 40));
-            var closeBtn = UiBuilderKit.MakeCloseButton(bg.transform, "CloseButton", 110);
-            UiBuilderKit.Place(closeBtn.GetComponent<Image>(), new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 40), new Vector2(110, 110));
+            UiBuilderKit.Place(feed, new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 150), new Vector2(700, 40));
+            var closeBtn = UiBuilderKit.MakeCloseButton(bg.transform, "CloseButton", 100);
+            UiBuilderKit.Place(closeBtn.GetComponent<Image>(), new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 36), new Vector2(100, 100));
 
             var panel = canvas.AddComponent<HandbookPanel>();
             UiBuilderKit.SetPrivate(panel, "_root", group);
@@ -65,6 +74,7 @@ namespace NtutAR.UiBuilder
             UiBuilderKit.SetPrivate(panel, "_summaryText", summary);
             UiBuilderKit.SetPrivate(panel, "_feedText", feed);
             UnityEditor.Events.UnityEventTools.AddPersistentListener(closeBtn.onClick, panel.Close);
+            UnityEditor.Events.UnityEventTools.AddPersistentListener(backdropBtn.onClick, panel.Close);
 
             canvas.SetActive(false); // 預設關閉,由 UiRoot 開啟
             UiBuilderKit.SavePrefab(canvas, "Assets/Prefabs/Ui/Handbook.prefab");
