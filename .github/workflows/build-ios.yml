@@ -18,23 +18,36 @@ env:
   PROJECT_PATH: unity-app
   BUNDLE_ID: me.panspace.ntut-ar-campus-tour
 
+# 兩段式架構(game-ci 官方推薦,省 macOS 分鐘數):
+#   1. build(ubuntu, 1x 計費):Unity → Xcode 專案。Unity 的 iOS 目標只輸出
+#      Xcode 專案(IL2CPP C++ 原始碼),這步不需要 macOS。
+#   2. sign-upload(macos, 10x 計費):只跑非 macOS 不可的部分 —— xcodebuild
+#      archive/export + TestFlight 上傳。
+# 全程 macOS 約 20 分(200 等效分鐘)→ 拆分後約 14 macOS 分 + 10-15 ubuntu 分
+# (~155 等效分鐘);Library cache miss 時省更多。
 jobs:
   build:
-    name: Unity iOS Build + TestFlight Upload
-    # macos-26 image 預設 Xcode 26.4.1 / iOS 26 SDK(Apple 從 2026 起強制要 iOS 26 SDK)
-    # macos-latest 目前仍指 macos-15(default Xcode 16.4),不能用
-    runs-on: macos-26
-    timeout-minutes: 90
+    name: Unity → Xcode project
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           lfs: false
 
-      - name: Verify Xcode / SDK
-        run: |
-          xcodebuild -version
-          xcrun --sdk iphoneos --show-sdk-version
+      # GitHub Linux runner 預設只剩 ~14GB 可用,unityci 的 iOS Docker image 很大,
+      # 清掉預裝雜物騰出 ~30GB(跟 build-android.yml 同 pattern)
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@v1.3.1  # pinned tag,避免 main 漂移 / 供應鏈攻擊
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: false
+          swap-storage: true
 
       - name: Cache Unity Library
         uses: actions/cache@v4
@@ -57,6 +70,41 @@ jobs:
           buildName: unity-app
           buildsPath: build
           versioning: None  # 用 Unity Player Settings 的 bundleVersion(目前 0.1.0),不讓 game-ci 自動算 0.0.X
+
+      # Xcode 專案交棒給 macOS job;artifact 較大(IL2CPP 原始碼),retention 設最短
+      - name: Upload Xcode project artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcode-project-${{ github.run_number }}
+          path: build/iOS
+          retention-days: 1
+          if-no-files-found: error
+
+  sign-upload:
+    name: Xcode archive + TestFlight Upload
+    needs: build
+    # macos-26 image 預設 Xcode 26.4.1 / iOS 26 SDK(Apple 從 2026 起強制要 iOS 26 SDK)
+    # macos-latest 目前仍指 macos-15(default Xcode 16.4),不能用
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - name: Verify Xcode / SDK
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+
+      - name: Download Xcode project artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: xcode-project-${{ github.run_number }}
+          path: build/iOS
+
+      # upload/download-artifact 不保留執行權限,補回 shell script 與 Unity 工具的 +x
+      # (漏掉會在 xcodebuild 的 Run Script phase 噴 Permission denied)
+      - name: Restore execute permissions
+        run: |
+          find build/iOS -type f -name "*.sh" -exec chmod +x {} \;
+          find build/iOS -type f -iname "usymtool*" -exec chmod +x {} \;
 
       - name: Import code-signing cert (.p12)
         uses: apple-actions/import-codesign-certs@v3
@@ -162,7 +210,7 @@ jobs:
           cat "$GITHUB_WORKSPACE/ExportOptions.plist"
 
       - name: Build archive (.xcarchive)
-        working-directory: build/iOS/unity-app  # game-ci 預設輸出位置:<buildsPath>/<targetPlatform>/<buildName>
+        working-directory: build/iOS/unity-app
         run: |
           # 智能選 workspace / project:有 .xcworkspace 用之(CocoaPods),否則 .xcodeproj
           if [ -d "Unity-iPhone.xcworkspace" ]; then
