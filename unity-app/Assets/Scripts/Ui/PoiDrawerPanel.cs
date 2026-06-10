@@ -19,11 +19,21 @@ namespace NtutAR.Ui
         private bool _open;
         private double _lat, _lng;
         private bool _hasGeo;
+        private PoiService _cachedPois;
+        private ExplorationService _cachedExploration;
 
         public bool IsOpen => _open;
 
+        /// <summary>抽屜自身的收合鈕用(打開後把手被面板蓋住,需由面板上的把手收合)</summary>
+        public void ToggleCached()
+        {
+            if (_cachedPois != null) Toggle(_cachedPois, _cachedExploration);
+        }
+
         public void Toggle(PoiService pois, ExplorationService exploration)
         {
+            _cachedPois = pois;
+            _cachedExploration = exploration;
             _open = !_open;
             if (_open) Rebuild(pois, exploration);
             StopAllCoroutines();

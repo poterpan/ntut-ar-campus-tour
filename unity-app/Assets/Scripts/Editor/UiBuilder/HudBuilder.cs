@@ -11,6 +11,7 @@ namespace NtutAR.UiBuilder
         public static void Build()
         {
             var canvas = UiBuilderKit.MakeCanvas("ArHud", 10);
+            var hudGroup = canvas.AddComponent<CanvasGroup>(); // 開場期間由 UiRoot 隱藏
             var safe = UiBuilderKit.MakeSafeArea(canvas);
             var hud = canvas.AddComponent<HudController>();
 
@@ -83,9 +84,14 @@ namespace NtutAR.UiBuilder
             UiBuilderKit.Stretch((RectTransform)hintText.transform);
             hint.gameObject.SetActive(false);
 
-            // ---- 抽屜把手(底部;面板本體為 PoiDrawer.prefab,把手按鈕由 UiRoot 接線) ----
+            // ---- 抽屜把手(底部,橫向撐滿;面板本體為 PoiDrawer.prefab,把手按鈕由 UiRoot 接線) ----
             var handle = UiBuilderKit.MakeGlassPanel(safe, "DrawerHandle");
-            UiBuilderKit.Place(handle, new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 0), new Vector2(1080, 140));
+            var handleRect = (RectTransform)handle.transform;
+            handleRect.anchorMin = new Vector2(0, 0);
+            handleRect.anchorMax = new Vector2(1, 0);
+            handleRect.pivot = new Vector2(.5f, 0);
+            handleRect.sizeDelta = new Vector2(0, 140);
+            handleRect.anchoredPosition = Vector2.zero;
             handle.gameObject.AddComponent<Button>();
             var handleText = UiBuilderKit.MakeText(handle.transform, "Text", "︿ 校園景點", 28, UiPalette.TextSub);
             UiBuilderKit.Stretch((RectTransform)handleText.transform);

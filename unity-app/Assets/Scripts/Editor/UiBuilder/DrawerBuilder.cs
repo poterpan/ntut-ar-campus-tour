@@ -12,14 +12,32 @@ namespace NtutAR.UiBuilder
         public static void Build()
         {
             var canvas = UiBuilderKit.MakeCanvas("PoiDrawer", 12);
-            var safe = UiBuilderKit.MakeSafeArea(canvas);
 
-            var panel = UiBuilderKit.MakeGlassPanel(safe, "Panel");
-            var panelRect = UiBuilderKit.Place(panel, new Vector2(.5f, 0), new Vector2(.5f, 0),
-                new Vector2(0, -980), new Vector2(1080, 1040)); // 初始收合(closedY)
+            // 面板掛 canvas 根並橫向撐滿(出血到螢幕左右與底邊;固定寬 1080 在窄機型會超出螢幕)
+            var panel = UiBuilderKit.MakeGlassPanel(canvas.transform, "Panel");
+            var panelRect = (RectTransform)panel.transform;
+            panelRect.anchorMin = new Vector2(0, 0);
+            panelRect.anchorMax = new Vector2(1, 0);
+            panelRect.pivot = new Vector2(.5f, 0);
+            panelRect.sizeDelta = new Vector2(0, 1040);
+            panelRect.anchoredPosition = new Vector2(0, -980); // 初始收合(closedY)
+
             var grabber = UiBuilderKit.MakeGlassPanel(panel.transform, "Grabber");
             grabber.color = UiPalette.TextSub;
             UiBuilderKit.Place(grabber, new Vector2(.5f, 1), new Vector2(.5f, 1), new Vector2(0, -16), new Vector2(96, 10));
+
+            // 頂部整條為可點擊的收合區(打開後 HUD 把手被蓋住,收合靠這裡)
+            var grabZone = new GameObject("GrabZone", typeof(RectTransform));
+            grabZone.transform.SetParent(panel.transform, false);
+            var grabRect = (RectTransform)grabZone.transform;
+            grabRect.anchorMin = new Vector2(0, 1);
+            grabRect.anchorMax = new Vector2(1, 1);
+            grabRect.pivot = new Vector2(.5f, 1);
+            grabRect.sizeDelta = new Vector2(0, 110);
+            grabRect.anchoredPosition = Vector2.zero;
+            var grabImg = grabZone.AddComponent<UnityEngine.UI.Image>();
+            grabImg.color = Color.clear; // 透明點擊區
+            var grabBtn = grabZone.AddComponent<UnityEngine.UI.Button>();
             var title = UiBuilderKit.MakeText(panel.transform, "Title", "校園景點", 36, UiPalette.TextMain, title: true);
             UiBuilderKit.Place(title, new Vector2(.5f, 1), new Vector2(.5f, 1), new Vector2(0, -64), new Vector2(600, 50));
 
@@ -67,6 +85,7 @@ namespace NtutAR.UiBuilder
             item.gameObject.SetActive(false);
 
             var drawer = canvas.AddComponent<PoiDrawerPanel>();
+            UnityEditor.Events.UnityEventTools.AddPersistentListener(grabBtn.onClick, drawer.ToggleCached);
             UiBuilderKit.SetPrivate(drawer, "_panel", panelRect);
             UiBuilderKit.SetPrivate(drawer, "_listRoot", contentRect);
             UiBuilderKit.SetPrivate(drawer, "_itemTemplate", (RectTransform)item.transform);

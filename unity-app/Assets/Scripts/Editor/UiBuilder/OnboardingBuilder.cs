@@ -11,7 +11,8 @@ namespace NtutAR.UiBuilder
         public static void Build()
         {
             var canvas = UiBuilderKit.MakeCanvas("Onboarding", 30);
-            var safe = UiBuilderKit.MakeSafeArea(canvas);
+            // 開場各步直接掛 canvas 根(全幅出血,蓋住瀏海與 Home bar 區);內容皆置中,不需 SafeArea
+            var safe = (RectTransform)canvas.transform;
 
             // Step 1: Splash(暖色全屏)
             var splash = MakeStep(safe, "Splash", true);

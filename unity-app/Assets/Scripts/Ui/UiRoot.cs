@@ -16,9 +16,23 @@ namespace NtutAR.Ui
         [SerializeField] private Button _drawerHandle;
         [SerializeField] private Button _handbookButton;
         [SerializeField] private CatSummonController _catSummon;
+        [Tooltip("可空;有開場流程時,HUD 會隱藏到開場結束才淡入")]
+        [SerializeField] private OnboardingController _onboarding;
+        [SerializeField] private CanvasGroup _hudGroup;
 
         private void Start()
         {
+            if (_onboarding != null && _hudGroup != null && _onboarding.gameObject.activeInHierarchy)
+            {
+                _hudGroup.alpha = 0f;
+                _hudGroup.blocksRaycasts = false;
+                _onboarding.Finished += () =>
+                {
+                    _hudGroup.blocksRaycasts = true;
+                    StartCoroutine(UiTween.Fade(_hudGroup, 1f, 0.5f));
+                };
+            }
+
             _drawerHandle.onClick.AddListener(() => _drawer.Toggle(_poiService, _hud.Exploration));
             _hud.GeoUpdated += _drawer.UpdateGeo;
             _handbookButton.onClick.AddListener(() => _handbook.Open(_poiService, _hud.Exploration));

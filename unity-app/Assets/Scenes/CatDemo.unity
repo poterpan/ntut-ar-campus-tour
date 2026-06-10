@@ -440,6 +440,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43b04aa6fd644c14a4a3bdb2f5e69770, type: 3}
   m_Name: 
   m_EditorClassIdentifier: NtutAR.Cat::NtutAR.Cat.CatSummonController
+--- !u!225 &413240500 stripped
+CanvasGroup:
+  m_CorrespondingSourceObject: {fileID: 7786738467473115092, guid: 10180a434298448e1ad5135e6b1c70d8, type: 3}
+  m_PrefabInstance: {fileID: 413240495}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &590786462
 GameObject:
   m_ObjectHideFlags: 0
@@ -981,6 +986,8 @@ MonoBehaviour:
   _drawerHandle: {fileID: 413240497}
   _handbookButton: {fileID: 413240498}
   _catSummon: {fileID: 413240499}
+  _onboarding: {fileID: 1434850236}
+  _hudGroup: {fileID: 413240500}
 --- !u!4 &1433589090
 Transform:
   m_ObjectHideFlags: 0
