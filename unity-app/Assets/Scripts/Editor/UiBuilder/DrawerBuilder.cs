@@ -19,8 +19,8 @@ namespace NtutAR.UiBuilder
             panelRect.anchorMin = new Vector2(0, 0);
             panelRect.anchorMax = new Vector2(1, 0);
             panelRect.pivot = new Vector2(.5f, 0);
-            panelRect.sizeDelta = new Vector2(0, 1040);
-            panelRect.anchoredPosition = new Vector2(0, -1100); // 初始收合(closedY,完全藏到螢幕外)
+            panelRect.sizeDelta = new Vector2(0, 1140); // 下緣多 100 推出螢幕,藏掉下方圓角
+            panelRect.anchoredPosition = new Vector2(0, -1240); // 初始收合(closedY,完全藏到螢幕外)
 
             var grabber = UiBuilderKit.MakeGlassPanel(panel.transform, "Grabber", 20f);
             grabber.color = UiPalette.TextSub;
@@ -47,8 +47,8 @@ namespace NtutAR.UiBuilder
             var scrollRect = (RectTransform)scrollGo.transform;
             scrollRect.anchorMin = new Vector2(0, 0);
             scrollRect.anchorMax = new Vector2(1, 1);
-            scrollRect.offsetMin = new Vector2(30, 30);
-            scrollRect.offsetMax = new Vector2(-30, -120);
+            scrollRect.offsetMin = new Vector2(44, 130);
+            scrollRect.offsetMax = new Vector2(-44, -120);
             var scroll = scrollGo.AddComponent<ScrollRect>();
             scrollGo.AddComponent<RectMask2D>();
             var content = new GameObject("Content", typeof(RectTransform));
@@ -73,20 +73,21 @@ namespace NtutAR.UiBuilder
             var iconBg = UiBuilderKit.MakeGlassPanel(item.transform, "IconBg");
             iconBg.sprite = UiBuilderKit.CircleSprite; iconBg.type = Image.Type.Simple;
             iconBg.color = UiPalette.ButtonGreen;
-            UiBuilderKit.Place(iconBg, new Vector2(0, .5f), new Vector2(0, .5f), new Vector2(24, 0), new Vector2(80, 80));
+            UiBuilderKit.Place(iconBg, new Vector2(0, .5f), new Vector2(0, .5f), new Vector2(40, 0), new Vector2(80, 80));
             var icon = UiBuilderKit.MakeText(iconBg.transform, "Icon", "館", 38, Color.white);
             UiBuilderKit.Stretch((RectTransform)icon.transform);
             var nameT = UiBuilderKit.MakeText(item.transform, "Name", "景點名", 32, UiPalette.TextMain);
             nameT.alignment = TextAlignmentOptions.Left;
-            UiBuilderKit.Place(nameT, new Vector2(0, .5f), new Vector2(0, .5f), new Vector2(124, 22), new Vector2(700, 44));
+            UiBuilderKit.Place(nameT, new Vector2(0, .5f), new Vector2(0, .5f), new Vector2(140, 22), new Vector2(700, 44));
             var subT = UiBuilderKit.MakeText(item.transform, "Sub", "-- · 未探索", 24, UiPalette.TextSub);
             subT.alignment = TextAlignmentOptions.Left;
-            UiBuilderKit.Place(subT, new Vector2(0, .5f), new Vector2(0, .5f), new Vector2(124, -26), new Vector2(700, 36));
+            UiBuilderKit.Place(subT, new Vector2(0, .5f), new Vector2(0, .5f), new Vector2(140, -26), new Vector2(700, 36));
             item.gameObject.SetActive(false);
 
             var drawer = canvas.AddComponent<PoiDrawerPanel>();
             UnityEditor.Events.UnityEventTools.AddPersistentListener(grabBtn.onClick, drawer.ToggleCached);
-            UiBuilderKit.SetPrivateFloat(drawer, "_closedY", -1100f);
+            UiBuilderKit.SetPrivateFloat(drawer, "_openY", -100f);
+            UiBuilderKit.SetPrivateFloat(drawer, "_closedY", -1240f);
             UiBuilderKit.SetPrivate(drawer, "_panel", panelRect);
             UiBuilderKit.SetPrivate(drawer, "_listRoot", contentRect);
             UiBuilderKit.SetPrivate(drawer, "_itemTemplate", (RectTransform)item.transform);
