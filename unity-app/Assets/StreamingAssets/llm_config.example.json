@@ -1,0 +1,6 @@
+{
+    "apiBaseUrl": "https://testvideo.site/v1",
+    "model": "gpt-5.5",
+    "maxTokens": 500,
+    "apiKey": "把你的 API key 貼在這裡,然後把本檔另存為 llm_config.json(已 gitignore,不會被 commit)"
+}
