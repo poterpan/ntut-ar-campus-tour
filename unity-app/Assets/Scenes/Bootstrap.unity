@@ -370,6 +370,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 192602556923763756, guid: 92280bf7e8787443aa25940a1775ed85, type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 25
+      objectReference: {fileID: 0}
     - target: {fileID: 5045744042272081507, guid: 92280bf7e8787443aa25940a1775ed85, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -806,6 +810,18 @@ PrefabInstance:
     - target: {fileID: 2307188874189591898, guid: 10180a434298448e1ad5135e6b1c70d8, type: 3}
       propertyPath: m_Name
       value: ArHud
+      objectReference: {fileID: 0}
+    - target: {fileID: 2816958174792408397, guid: 10180a434298448e1ad5135e6b1c70d8, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4286548129
+      objectReference: {fileID: 0}
+    - target: {fileID: 2816958174792408397, guid: 10180a434298448e1ad5135e6b1c70d8, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 5589240687121044263, guid: 10180a434298448e1ad5135e6b1c70d8, type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 6557814675219815702, guid: 10180a434298448e1ad5135e6b1c70d8, type: 3}
       propertyPath: m_Pivot.x
@@ -1630,6 +1646,7 @@ GameObject:
   - component: {fileID: 614262962}
   - component: {fileID: 614262961}
   - component: {fileID: 614262960}
+  - component: {fileID: 614262969}
   m_Layer: 0
   m_Name: GuideSystem
   m_TagString: Untagged
@@ -1650,7 +1667,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: NtutAR.Guide::NtutAR.Guide.GuideInteractionController
   _poiService: {fileID: 614262967}
-  _llmBehaviour: {fileID: 614262966}
+  _llmBehaviour: {fileID: 614262969}
   _ttsBehaviour: {fileID: 614262965}
   _anchorBehaviour: {fileID: 614262963}
   _npcPrefab: {fileID: 6738174682242728728, guid: 03589de0ef7854927a59027ec826cacb, type: 3}
@@ -1772,6 +1789,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &614262969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 614262959}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95b27ce30ac61441480678236e7e3152, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NtutAR.Guide::NtutAR.Guide.OpenAiCompatLlmClient
+  _apiBaseUrl: https://testvideo.site/v1
+  _model: gpt-5.5
+  _maxTokens: 500
+  _timeoutSeconds: 30
 --- !u!1 &624315044
 GameObject:
   m_ObjectHideFlags: 0
@@ -4351,6 +4384,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1066477452813138355, guid: 675cbc6d0b1b94155af419c6237a5324, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1069055780818238504, guid: 675cbc6d0b1b94155af419c6237a5324, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -4434,6 +4471,10 @@ PrefabInstance:
     - target: {fileID: 5832218427778185511, guid: 675cbc6d0b1b94155af419c6237a5324, type: 3}
       propertyPath: m_Name
       value: PoiDrawer
+      objectReference: {fileID: 0}
+    - target: {fileID: 6737631736888330056, guid: 675cbc6d0b1b94155af419c6237a5324, type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 25
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
