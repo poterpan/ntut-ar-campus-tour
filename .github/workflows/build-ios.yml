@@ -58,6 +58,25 @@ jobs:
             Library-iOS-
             Library-
 
+      # LLM API 設定(含金鑰)不入版控,build 前由 secret 生成,讓 CI build 也能對話
+      - name: Write llm_config.json (from secret)
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+        run: |
+          if [ -z "$LLM_API_KEY" ]; then
+            echo "::warning::LLM_API_KEY secret 未設定,此 build 的 LLM 對話會降級為離線訊息"
+          else
+            cat > "$PROJECT_PATH/Assets/StreamingAssets/llm_config.json" <<EOF
+          {
+              "apiBaseUrl": "https://testvideo.site/v1",
+              "model": "gpt-5.5",
+              "maxTokens": 500,
+              "apiKey": "$LLM_API_KEY"
+          }
+          EOF
+            echo "llm_config.json written"
+          fi
+
       - name: Unity → Xcode project
         uses: game-ci/unity-builder@v4
         env:
