@@ -97,6 +97,7 @@ unity-app/[Aa]ssets/[Ss]treamingAssets/aa/*
 #  ⚠️ Unity 的 .meta 檔「必須」commit,絕對不要忽略!
 #  ⚠️ 二進位大型素材建議用 Git LFS 管理(見 README「版本控制」段)
 # ==============================================================
+.superpowers/
 
 # ---- LLM API 設定(含金鑰,絕不入版控;範本見 llm_config.example.json) ----
 unity-app/Assets/StreamingAssets/llm_config.json

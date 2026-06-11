@@ -47,8 +47,22 @@ namespace NtutAR.Guide
         {
             if (_npcInstance == null) return;
             if (!TryGetTapRay(out var ray)) return;
-            if (Physics.Raycast(ray, out var hit) && hit.collider.transform.IsChildOf(_npcInstance.transform))
-                OpenChat();
+            // RaycastAll:室內測試時 AR 平面(桌面等)的 collider 會擋在 NPC 前面,
+            // 單發 Raycast 打到平面就停;只要路徑上有 NPC 就算點到
+            var hits = Physics.RaycastAll(ray, 100f);
+            bool hitNpc = false;
+            foreach (var hit in hits)
+            {
+                if (hit.collider.transform.IsChildOf(_npcInstance.transform))
+                {
+                    hitNpc = true;
+                    OpenChat();
+                    break;
+                }
+            }
+            // 實機診斷用(Xcode console 可見):記錄每次點擊打到了什麼
+            Debug.Log($"[Guide] tap hits={hits.Length} npc={hitNpc} " +
+                      string.Join(",", System.Array.ConvertAll(hits, h => h.collider.name)));
         }
 
         private void ShowNpc(NtutAR.Poi.Poi poi)
@@ -70,6 +84,39 @@ namespace NtutAR.Guide
         {
             if (_npcInstance != null && _activePoi.id == poi.id) return;
             ShowNpc(poi);
+        }
+
+        /// <summary>隱藏測試開關用(連點玩家狀態列觸發):不經 anchor,直接把 NPC 召喚到鏡頭前方,
+        /// 讓不在 POI 現場時也能測對話流程。POI 內容取 debugPoiId(預設 p01)。</summary>
+        public void DebugSummonNpc()
+        {
+            if (_poiService == null || _arCamera == null || _npcPrefab == null) return;
+            if (!_poiService.TryGetById(_debugPoiId, out var poi))
+            {
+                if (_poiService.All.Count == 0) return;
+                poi = _poiService.All[0];
+            }
+            _activePoi = poi;
+
+            if (_npcInstance != null) Destroy(_npcInstance);
+            var cam = _arCamera.transform;
+            var forward = Vector3.ProjectOnPlane(cam.forward, Vector3.up).normalized;
+            if (forward.sqrMagnitude < 0.001f) forward = Vector3.forward;
+            var pos = cam.position + forward * 2f;
+            pos.y = cam.position.y - 1.3f;   // 概略地面高度(鏡頭下方 1.3m)
+            _npcInstance = Instantiate(_npcPrefab, pos, Quaternion.identity);
+            _npcAnimator = _npcInstance.GetComponentInChildren<NpcAnimator>();
+            FaceCamera();
+            Debug.Log($"[Guide] Debug 召喚 NPC(poi={poi.id},不經 anchor)");
+            // 1.5 秒後自動開對話:把「對話面板/層級」與「點擊判定」兩個問題切開,
+            // 點擊判定若有問題,至少對話流程先可測
+            StartCoroutine(DebugAutoOpenChat());
+        }
+
+        private System.Collections.IEnumerator DebugAutoOpenChat()
+        {
+            yield return new WaitForSeconds(1.5f);
+            if (_npcInstance != null) OpenChat();
         }
 
         private void FaceCamera()

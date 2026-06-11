@@ -17,6 +17,9 @@ namespace NtutAR.Cat
     /// </summary>
     public class CatSummonController : MonoBehaviour
     {
+        /// <summary>貓咪吃到罐頭時觸發(供 UI 統計餵食次數)</summary>
+        public event System.Action CatFed;
+
         [Header("Prefabs")]
         [SerializeField] private CatQLearningAgent _catPrefab;
         [SerializeField] private GameObject _canPrefab;
@@ -192,6 +195,7 @@ namespace NtutAR.Cat
 
         private void OnCatReachedCan()
         {
+            CatFed?.Invoke();
             if (_activeCan != null)
             {
                 Destroy(_activeCan);

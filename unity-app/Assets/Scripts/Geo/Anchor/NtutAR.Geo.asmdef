@@ -4,6 +4,7 @@
     "references": [
         "NtutAR.Poi",
         "NtutAR.Guide",
+        "NtutAR.Ui",
         "Google.XR.ARCoreExtensions",
         "Unity.XR.ARFoundation",
         "Unity.XR.ARSubsystems"

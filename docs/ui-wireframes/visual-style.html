@@ -1,0 +1,52 @@
+<h2>視覺風格要走哪個方向？</h2>
+<p class="subtitle">同一組元件(狀態列、POI 卡片、主按鈕)套三種風格。選一個,或告訴我想混搭的部分。</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:linear-gradient(160deg,#4fc3f7,#81d4fa);padding:16px;display:flex;flex-direction:column;gap:10px;align-items:center;">
+      <div style="background:#fff;border-radius:24px;padding:6px 16px;font-size:11px;font-weight:700;color:#0277bd;box-shadow:0 3px 8px rgba(0,0,0,.2);">📍 距離紅樓 35m</div>
+      <div style="background:#fff;border-radius:16px;padding:12px;width:85%;box-shadow:0 4px 12px rgba(0,0,0,.18);">
+        <div style="font-size:12px;font-weight:800;color:#01579b;">北科紅樓</div>
+        <div style="font-size:9px;color:#666;margin-top:3px;">創校時期建築,1918 年落成</div>
+        <div style="margin-top:8px;background:linear-gradient(180deg,#ffd54f,#ffb300);border-radius:20px;padding:5px 0;text-align:center;font-size:10px;font-weight:800;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25);">開始導覽</div>
+      </div>
+      <div style="width:52px;height:52px;background:radial-gradient(circle at 35% 30%,#ffb74d,#f57c00);border-radius:50%;border:4px solid #fff;box-shadow:0 4px 10px rgba(0,0,0,.25);"></div>
+    </div>
+    <div class="card-body">
+      <h3>A — 冒險活力風(Pokémon GO)</h3>
+      <p>飽和天藍底、純白圓角卡、亮橘漸層按鈕、粗字重。遊戲感最強,demo 畫面最搶眼;但元素多時容易顯得吵。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:linear-gradient(160deg,#f5efe6,#e8dfd0);padding:16px;display:flex;flex-direction:column;gap:10px;align-items:center;">
+      <div style="background:#fffdf9;border-radius:24px;padding:6px 16px;font-size:11px;font-weight:600;color:#8d6e63;box-shadow:0 2px 6px rgba(141,110,99,.18);">🌸 距離紅樓 35m</div>
+      <div style="background:#fffdf9;border-radius:20px;padding:12px;width:85%;box-shadow:0 3px 10px rgba(141,110,99,.15);">
+        <div style="font-size:12px;font-weight:700;color:#5d4037;">北科紅樓</div>
+        <div style="font-size:9px;color:#a1887f;margin-top:3px;">創校時期建築,1918 年落成</div>
+        <div style="margin-top:8px;background:#aed581;border-radius:20px;padding:5px 0;text-align:center;font-size:10px;font-weight:700;color:#fff;">開始導覽</div>
+      </div>
+      <div style="width:52px;height:52px;background:radial-gradient(circle at 35% 30%,#ffcc80,#ffa726);border-radius:50%;border:4px solid #fffdf9;box-shadow:0 3px 8px rgba(141,110,99,.25);"></div>
+    </div>
+    <div class="card-body">
+      <h3>B — 溫暖療癒風(皮克敏 Bloom)</h3>
+      <p>奶油米白底、暖棕文字、抹茶綠按鈕、柔和陰影。跟「餵貓」彩蛋的氣質最合,溫柔耐看;但「導覽工具」的資訊感較弱。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:linear-gradient(160deg,#1a1a2e,#16213e);padding:16px;display:flex;flex-direction:column;gap:10px;align-items:center;">
+      <div style="background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);border-radius:24px;padding:6px 16px;font-size:11px;font-weight:600;color:#fff;">📍 距離紅樓 35m</div>
+      <div style="background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.22);border-radius:16px;padding:12px;width:85%;">
+        <div style="font-size:12px;font-weight:700;color:#fff;">北科紅樓</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:3px;">創校時期建築,1918 年落成</div>
+        <div style="margin-top:8px;background:#7c4dff;border-radius:20px;padding:5px 0;text-align:center;font-size:10px;font-weight:700;color:#fff;">開始導覽</div>
+      </div>
+      <div style="width:52px;height:52px;background:radial-gradient(circle at 35% 30%,#b388ff,#7c4dff);border-radius:50%;border:3px solid rgba(255,255,255,.5);"></div>
+    </div>
+    <div class="card-body">
+      <h3>C — 現代玻璃擬態風(科技質感)</h3>
+      <p>半透明毛玻璃卡片 + 北科紫點綴,文字直接疊在相機畫面上最不突兀(AR App 常見手法,如 Apple 的 AR 介面)。質感高、資訊清楚;遊戲感最弱。</p>
+    </div>
+  </div>
+</div>

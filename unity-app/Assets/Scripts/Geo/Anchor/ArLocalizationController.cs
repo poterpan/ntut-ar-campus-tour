@@ -17,6 +17,8 @@ namespace NtutAR.Geo
         private void Update()
         {
             if (_localized || _earthManager == null) return;
+            // AR Session 未啟動時(Editor)getter 會拋 NRE
+            if (!_earthManager.isActiveAndEnabled) return;
             if (_earthManager.EarthState != EarthState.Enabled) return;
             if (_earthManager.EarthTrackingState != UnityEngine.XR.ARSubsystems.TrackingState.Tracking) return;
 
