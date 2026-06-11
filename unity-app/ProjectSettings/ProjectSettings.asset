@@ -145,11 +145,6 @@ PlayerSettings:
   tvOSBundleVersion: 1.0
   bundleVersion: 0.1.0
   preloadedAssets:
-  - {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  - {fileID: 7824971455699653306, guid: a2a6b9457236247be89e40eb75526b8d, type: 2}
-  - {fileID: 4800000, guid: e7c77f6eaab324a819efdc13b8125a39, type: 3}
-  - {fileID: 4800000, guid: 6743a50a812740be8c0aa3fccc46fae9, type: 3}
-  - {fileID: 316843303881921000, guid: cfd4f5c20324c4cf3a64db48967d9a82, type: 2}
   - {fileID: 11400000, guid: c0ea3ba5d720e446cace80556e3ffdc9, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
@@ -178,7 +173,7 @@ PlayerSettings:
   buildNumber:
     Standalone: 0
     VisionOS: 0
-    iPhone: 0
+    iPhone: 260611.1536
     tvOS: 0
   overrideDefaultApplicationIdentifier: 1
   AndroidBundleVersionCode: 1
