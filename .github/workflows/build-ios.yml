@@ -142,34 +142,25 @@ jobs:
           echo "PROFILE_UUID=$UUID" >> $GITHUB_ENV
           echo "Installed profile UUID: $UUID"
 
-      # 把 CFBundleVersion(build number)bump 成 github.run_number,
-      # 確保每次 TestFlight 上傳的 build number 唯一(Apple 強制要求)
-      - name: Bump CFBundleVersion
+      # Build number 由 Unity 端的 BuildNumberStamper 在 build 時自動蓋
+      # (自 2026-01-01 起的分鐘數,單調遞增;本地與 CI 同一來源,永不撞號)。
+      # 原本的 PlistBuddy bump(github.run_number)已移除——run_number 比分鐘數小,
+      # 蓋回去會違反 TestFlight 的遞增規則。這裡只印出來確認:
+      - name: Show CFBundleVersion (stamped by Unity)
         working-directory: build/iOS/unity-app
-        env:
-          BUILD_NUMBER: ${{ github.run_number }}
         run: |
-          echo "=== 候選 Info.plist ==="
-          find . -maxdepth 4 -name "Info.plist" 2>/dev/null
-
-          # 找主 app 的 Info.plist,排除 Pods / xcframework / UnityFramework
           PLIST=$(find . -maxdepth 4 -name "Info.plist" \
             -not -path "*Pods*" \
             -not -path "*xcframework*" \
             -not -path "*UnityFramework*" \
             -not -path "*Frameworks*" \
             -print 2>/dev/null | head -1)
-
           if [ -z "$PLIST" ] || [ ! -f "$PLIST" ]; then
             echo "::error::找不到主 app 的 Info.plist"
-            echo "=== build/iOS/unity-app 完整列表 ==="
             ls -la
             exit 1
           fi
-
           echo "Using: $PLIST"
-          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "$PLIST"
-          echo "✓ 設定後:"
           /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST"
           /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$PLIST" 2>/dev/null || echo "(無 CFBundleShortVersionString)"
 
