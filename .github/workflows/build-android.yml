@@ -105,6 +105,18 @@ jobs:
           # manifest/lock → "Branch is dirty. Refusing to base semantic version
           # on uncommitted changes" 直接拒絕 build。
           versioning: None
+          # versionCode = run_number:每次 build 遞增,APK 才能原地更新
+          #(同簽名 + versionCode 不降級)。run_number 單調遞增。
+          androidVersionCode: ${{ github.run_number }}
+          # Release keystore 簽名:builder 收到非空 androidKeystoreName 會自動
+          # 設 PlayerSettings.Android.useCustomKeystore = true(故 ProjectSettings.asset
+          # 不必預設 useCustomKeystore,本機開專案也不會因缺 keystore 報錯)。
+          # base64 在 runner 上解碼成 release.keystore;keystore 檔本身不進版控。
+          androidKeystoreName: release.keystore
+          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
+          androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
 
       - name: Upload APK as artifact
         if: always()
@@ -124,8 +136,9 @@ jobs:
           files: build/Android/unity-app.apk
           body: |
             Auto-built Android APK from commit ${{ github.sha }}
+            package: me.panspace.ntutartour ・ release-signed(固定 keystore)
 
-            ⚠️ 目前 Geospatial 在 Android 上不會 work
-            (還沒設定 Android-restricted GCP API key + release keystore 對齊 SHA-1)。
-            這個 APK 適合測 AR 基本功能跟 UI,Geospatial 相關功能會失敗。
-            完整 Android Geospatial 支援預計 W3/W4 處理。
+            ℹ️ 從本版起改用固定 release keystore 簽名。**簽名與先前 debug 版不同,
+            既有測試機要先移除舊版才能安裝**;之後的版本可原地更新(versionCode 遞增)。
+            Geospatial:GCP API key 已填、尚未設應用程式限制(package + SHA-1),
+            定位功能待實機驗證。
