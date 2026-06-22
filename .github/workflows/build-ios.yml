@@ -58,24 +58,34 @@ jobs:
             Library-iOS-
             Library-
 
-      # LLM API 設定(含金鑰)不入版控,build 前由 secret 生成,讓 CI build 也能對話
-      - name: Write llm_config.json (from secret)
+      # LLM/語音 設定(含金鑰)不入版控,build 前由 secret 生成。
+      # LLM、TTS(GLM)、STT(ElevenLabs)金鑰共用同一份 llm_config.json;缺哪個就該功能降級。
+      - name: Write llm_config.json (from secrets)
         env:
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
         run: |
-          if [ -z "$LLM_API_KEY" ]; then
-            echo "::warning::LLM_API_KEY secret 未設定,此 build 的 LLM 對話會降級為離線訊息"
-          else
-            cat > "$PROJECT_PATH/Assets/StreamingAssets/llm_config.json" <<EOF
+          [ -z "$LLM_API_KEY" ] && echo "::warning::LLM_API_KEY 未設定 → LLM 對話降級為離線訊息"
+          [ -z "$GLM_API_KEY" ] && echo "::warning::GLM_API_KEY 未設定 → TTS(語音念出)降級為靜默"
+          [ -z "$ELEVENLABS_API_KEY" ] && echo "::warning::ELEVENLABS_API_KEY 未設定 → STT(語音輸入)停用"
+          cat > "$PROJECT_PATH/Assets/StreamingAssets/llm_config.json" <<EOF
           {
               "apiBaseUrl": "https://testvideo.site/v1",
               "model": "gpt-5.5",
               "maxTokens": 500,
-              "apiKey": "$LLM_API_KEY"
+              "apiKey": "$LLM_API_KEY",
+              "glmApiKey": "$GLM_API_KEY",
+              "glmTtsUrl": "https://open.bigmodel.cn/api/paas/v4/audio/speech",
+              "glmTtsModel": "glm-tts",
+              "glmVoice": "xiaochen",
+              "glmSpeed": 1.3,
+              "elevenLabsApiKey": "$ELEVENLABS_API_KEY",
+              "sttUrl": "https://api.elevenlabs.io/v1/speech-to-text",
+              "sttModel": "scribe_v1"
           }
           EOF
-            echo "llm_config.json written"
-          fi
+          echo "llm_config.json written"
 
       - name: Unity → Xcode project
         uses: game-ci/unity-builder@v4

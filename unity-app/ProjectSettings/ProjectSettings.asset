@@ -588,7 +588,8 @@ PlayerSettings:
   enableCrashReportAPI: 0
   cameraUsageDescription: 'AR needed '
   locationUsageDescription: 'AR needed '
-  microphoneUsageDescription: 'AR needed '
+  microphoneUsageDescription: "\u672C App \u4F7F\u7528\u9EA5\u514B\u98A8\u8B93\u4F60\u4EE5\u8A9E\u97F3\u5411
+    AR \u5C0E\u89BD\u54E1\u8001\u9EC3\u63D0\u554F\u3002"
   bluetoothUsageDescription: 
   macOSTargetOSVersion: 12.0
   switchNMETAOverride: 

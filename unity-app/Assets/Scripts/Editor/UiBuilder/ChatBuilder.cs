@@ -81,7 +81,7 @@ namespace NtutAR.UiBuilder
             inputRect.anchorMin = new Vector2(0, 0);
             inputRect.anchorMax = new Vector2(1, 0);
             inputRect.offsetMin = new Vector2(30, 130);
-            inputRect.offsetMax = new Vector2(-250, 230);
+            inputRect.offsetMax = new Vector2(-390, 230);   // 右側讓給 麥克風 + 送出 兩顆鈕
 
             var textArea = new GameObject("Text Area", typeof(RectTransform));
             textArea.transform.SetParent(inputBg.transform, false);
@@ -115,12 +115,23 @@ namespace NtutAR.UiBuilder
             var sendLabel = UiBuilderKit.MakeText(sendBtnImg.transform, "Label", "送出", 34, Color.white);
             UiBuilderKit.Stretch((RectTransform)sendLabel.transform);
 
+            // ---- 麥克風鈕(按住說話,Issue #26 STT)----
+            var micBtnImg = UiBuilderKit.MakeGlassPanel(panel.transform, "MicButton", 1.9f);
+            micBtnImg.color = UiPalette.ButtonGreen;
+            micBtnImg.raycastTarget = true;
+            UiBuilderKit.Place(micBtnImg, new Vector2(1, 0), new Vector2(1, 0), new Vector2(-250, 130), new Vector2(130, 100));
+            var micLabel = UiBuilderKit.MakeText(micBtnImg.transform, "Label", "按住\n說話", 26, Color.white);
+            UiBuilderKit.Stretch((RectTransform)micLabel.transform);
+            var micHold = micBtnImg.gameObject.AddComponent<MicHoldButton>();   // 按住=錄音,放開=辨識
+
             // ---- GuideChatPanel 接線 ----
             var chatPanel = canvas.AddComponent<GuideChatPanel>();
             UiBuilderKit.SetPrivate(chatPanel, "_root", panel.gameObject);
             UiBuilderKit.SetPrivate(chatPanel, "_input", input);
             UiBuilderKit.SetPrivate(chatPanel, "_messageContainer", contentRect);
             UiBuilderKit.SetPrivate(chatPanel, "_messagePrefab", messagePrefab);
+            UiBuilderKit.SetPrivate(chatPanel, "_sendButton", sendBtn);   // Issue #21:busy 時 disable
+            UiBuilderKit.SetPrivate(micHold, "_panel", chatPanel);        // Issue #26:麥克風鈕回呼面板
             UnityEditor.Events.UnityEventTools.AddPersistentListener(sendBtn.onClick, chatPanel.OnSendButton);
             UnityEditor.Events.UnityEventTools.AddVoidPersistentListener(input.onSubmit, chatPanel.OnSendButton);
             UnityEditor.Events.UnityEventTools.AddPersistentListener(closeBtn.onClick, chatPanel.Close);

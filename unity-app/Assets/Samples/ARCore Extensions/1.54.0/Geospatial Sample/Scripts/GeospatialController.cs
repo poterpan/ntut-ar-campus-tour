@@ -192,32 +192,32 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         /// <summary>
         /// Help message shown while localizing.
         /// </summary>
-        private const string _localizingMessage = "Localizing your device to set anchor.";
+        private const string _localizingMessage = "定位中,請稍候…";
 
         /// <summary>
         /// Help message shown while initializing Geospatial functionalities.
         /// </summary>
         private const string _localizationInitializingMessage =
-            "Initializing Geospatial functionalities.";
+            "正在初始化定位功能…";
 
         /// <summary>
         /// Help message shown when <see cref="AREarthManager.EarthTrackingState"/> is not tracking
         /// or the pose accuracies are beyond thresholds.
         /// </summary>
         private const string _localizationInstructionMessage =
-            "Point your camera at buildings, stores, and signs near you.";
+            "請將鏡頭對準周圍的建築物與招牌,協助定位。";
 
         /// <summary>
         /// Help message shown when location fails or hits timeout.
         /// </summary>
         private const string _localizationFailureMessage =
-            "Localization not possible.\n" +
-            "Close and open the app to restart the session.";
+            "無法完成定位。\n" +
+            "請關閉並重新開啟 App 後再試一次。";
 
         /// <summary>
         /// Help message shown when localization is completed.
         /// </summary>
-        private const string _localizationSuccessMessage = "Localization completed.";
+        private const string _localizationSuccessMessage = "定位完成!";
 
         /// <summary>
         /// The timeout period waiting for localization to be completed.
