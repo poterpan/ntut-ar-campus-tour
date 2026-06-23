@@ -87,6 +87,25 @@ jobs:
           EOF
           echo "llm_config.json written"
 
+      # ARCore Geospatial API key 不入版控(已 GCP 設限);build 前由 secret 注入 JSON,
+      # ARCore 的 build 前置處理器(RuntimeConfigPreprocessBuild)再把 iOS key 寫進
+      # ARCoreRuntimeSettings.asset、Android key 注進 AndroidManifest。
+      - name: Inject ARCore API keys (from secrets)
+        env:
+          ARCORE_IOS_API_KEY: ${{ secrets.ARCORE_IOS_API_KEY }}
+          ARCORE_ANDROID_API_KEY: ${{ secrets.ARCORE_ANDROID_API_KEY }}
+        run: |
+          [ -z "$ARCORE_IOS_API_KEY" ] && echo "::warning::ARCORE_IOS_API_KEY 未設定 → iOS Geospatial 定位會失效"
+          python3 - "$PROJECT_PATH/ProjectSettings/ARCoreExtensionsProjectSettings.json" <<'PY'
+          import json, os, sys
+          p = sys.argv[1]
+          d = json.load(open(p))
+          d["IOSCloudServicesApiKey"] = os.environ.get("ARCORE_IOS_API_KEY", "")
+          d["AndroidCloudServicesApiKey"] = os.environ.get("ARCORE_ANDROID_API_KEY", "")
+          json.dump(d, open(p, "w"), separators=(",", ":"))
+          print("ARCore keys injected:", p)
+          PY
+
       - name: Unity → Xcode project
         uses: game-ci/unity-builder@v4
         env:
