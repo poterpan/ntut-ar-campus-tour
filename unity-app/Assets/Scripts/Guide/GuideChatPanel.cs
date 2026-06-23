@@ -15,6 +15,8 @@ namespace NtutAR.Guide
         [SerializeField] private Button _sendButton;
         [Tooltip("等待 LLM 回覆時顯示的提示文字")]
         [SerializeField] private string _thinkingText = "老黃思考中…";
+        [Tooltip("文字已出、語音生成中(GLM TTS ~6-10s)顯示的提示文字")]
+        [SerializeField] private string _speechText = "正在生成語音…";
 
         public event Action<string> Sent;
 
@@ -26,7 +28,8 @@ namespace NtutAR.Guide
         /// <summary>面板目前是否開啟(Issue #20:OpenChat 用來避免重複起 session)。</summary>
         public bool IsOpen => _root != null && _root.activeSelf;
 
-        private GameObject _thinkingBubble;
+        // 單一「狀態泡泡」:依序顯示「老黃思考中…」(LLM 查詢)→「正在生成語音…」(TTS 生成)→ 消失。
+        private GameObject _pendingBubble;
         private bool _busy;
 
         public void Open() => _root.SetActive(true);
@@ -66,34 +69,48 @@ namespace NtutAR.Guide
         public void OnMicUp() => SpeechCaptureEnd?.Invoke();
 
         /// <summary>
-        /// Issue #21:切換「等待 LLM 回覆」狀態。busy 時插一顆「思考中…」泡泡並鎖住輸入,
-        /// 回覆到達(SetBusy(false))時移除。回覆泡泡請在 SetBusy(false) 之後再 Append,
-        /// 才不會夾在思考泡泡下面。
+        /// Issue #21:LLM 查詢中。顯示「老黃思考中…」狀態泡泡並鎖住輸入。
+        /// 注意:SetBusy(false) 只解鎖輸入,不收掉泡泡 —— 由後續的 SetSpeechPreparing 接手
+        /// (思考→生成語音 兩段連續無縫),最後在語音開始播時才收掉。
         /// </summary>
         public void SetBusy(bool busy)
         {
             _busy = busy;
             if (_sendButton != null) _sendButton.interactable = !busy;
             if (_input != null) _input.interactable = !busy;
+            if (busy) ShowPending(_thinkingText);
+        }
 
-            if (busy)
+        /// <summary>
+        /// Issue #26 / 延遲提示:文字已出、語音還在生成(GLM TTS POST ~6-10s)時顯示「正在生成語音…」;
+        /// 語音開始播放(SpeakingStarted)時 preparing=false → 收掉泡泡。
+        /// </summary>
+        public void SetSpeechPreparing(bool preparing)
+        {
+            if (preparing) ShowPending(_speechText);
+            else HidePending();
+        }
+
+        private void ShowPending(string text)
+        {
+            if (_pendingBubble == null && _messagePrefab != null)
+                _pendingBubble = Instantiate(_messagePrefab, _messageContainer);
+            if (_pendingBubble != null)
+                _pendingBubble.GetComponentInChildren<TextMeshProUGUI>().text = $"導遊: {text}";
+        }
+
+        private void HidePending()
+        {
+            if (_pendingBubble != null)
             {
-                if (_thinkingBubble == null && _messagePrefab != null)
-                {
-                    _thinkingBubble = Instantiate(_messagePrefab, _messageContainer);
-                    _thinkingBubble.GetComponentInChildren<TextMeshProUGUI>().text = $"導遊: {_thinkingText}";
-                }
-            }
-            else if (_thinkingBubble != null)
-            {
-                Destroy(_thinkingBubble);
-                _thinkingBubble = null;
+                Destroy(_pendingBubble);
+                _pendingBubble = null;
             }
         }
 
         private void ClearMessages()
         {
-            _thinkingBubble = null;   // 一併銷毀於下方迴圈,清掉殘留參考
+            _pendingBubble = null;   // 一併銷毀於下方迴圈,清掉殘留參考
             _busy = false;
             if (_sendButton != null) _sendButton.interactable = true;
             if (_input != null) _input.interactable = true;

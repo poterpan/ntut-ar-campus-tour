@@ -50,7 +50,7 @@ namespace NtutAR.UiBuilder
             var scrollRect = (RectTransform)scrollGo.transform;
             scrollRect.anchorMin = new Vector2(0, 0);
             scrollRect.anchorMax = new Vector2(1, 1);
-            scrollRect.offsetMin = new Vector2(30, 260);          // 底部讓給輸入列(含出血 100)
+            scrollRect.offsetMin = new Vector2(30, 400);          // 底部讓給輸入列(含出血 100 + Home Bar 安全邊距 140)
             scrollRect.offsetMax = new Vector2(-30, -120);
             var scroll = scrollGo.AddComponent<ScrollRect>();
             scrollGo.AddComponent<RectMask2D>();
@@ -80,8 +80,8 @@ namespace NtutAR.UiBuilder
             var inputRect = (RectTransform)inputBg.transform;
             inputRect.anchorMin = new Vector2(0, 0);
             inputRect.anchorMax = new Vector2(1, 0);
-            inputRect.offsetMin = new Vector2(30, 130);
-            inputRect.offsetMax = new Vector2(-390, 230);   // 右側讓給 麥克風 + 送出 兩顆鈕
+            inputRect.offsetMin = new Vector2(30, 270);     // +140 抬離 Home Bar(避免誤觸喚醒 Siri)
+            inputRect.offsetMax = new Vector2(-390, 370);   // 右側讓給 麥克風 + 送出 兩顆鈕
 
             var textArea = new GameObject("Text Area", typeof(RectTransform));
             textArea.transform.SetParent(inputBg.transform, false);
@@ -110,7 +110,7 @@ namespace NtutAR.UiBuilder
             var sendBtnImg = UiBuilderKit.MakeGlassPanel(panel.transform, "SendButton", 1.9f);
             sendBtnImg.color = UiPalette.ButtonGreen;
             sendBtnImg.raycastTarget = true;
-            UiBuilderKit.Place(sendBtnImg, new Vector2(1, 0), new Vector2(1, 0), new Vector2(-30, 130), new Vector2(200, 100));
+            UiBuilderKit.Place(sendBtnImg, new Vector2(1, 0), new Vector2(1, 0), new Vector2(-30, 270), new Vector2(200, 100));
             var sendBtn = sendBtnImg.gameObject.AddComponent<Button>();
             var sendLabel = UiBuilderKit.MakeText(sendBtnImg.transform, "Label", "送出", 34, Color.white);
             UiBuilderKit.Stretch((RectTransform)sendLabel.transform);
@@ -119,7 +119,7 @@ namespace NtutAR.UiBuilder
             var micBtnImg = UiBuilderKit.MakeGlassPanel(panel.transform, "MicButton", 1.9f);
             micBtnImg.color = UiPalette.ButtonGreen;
             micBtnImg.raycastTarget = true;
-            UiBuilderKit.Place(micBtnImg, new Vector2(1, 0), new Vector2(1, 0), new Vector2(-250, 130), new Vector2(130, 100));
+            UiBuilderKit.Place(micBtnImg, new Vector2(1, 0), new Vector2(1, 0), new Vector2(-250, 270), new Vector2(130, 100));
             var micLabel = UiBuilderKit.MakeText(micBtnImg.transform, "Label", "按住\n說話", 26, Color.white);
             UiBuilderKit.Stretch((RectTransform)micLabel.transform);
             var micHold = micBtnImg.gameObject.AddComponent<MicHoldButton>();   // 按住=錄音,放開=辨識
@@ -132,6 +132,8 @@ namespace NtutAR.UiBuilder
             UiBuilderKit.SetPrivate(chatPanel, "_messagePrefab", messagePrefab);
             UiBuilderKit.SetPrivate(chatPanel, "_sendButton", sendBtn);   // Issue #21:busy 時 disable
             UiBuilderKit.SetPrivate(micHold, "_panel", chatPanel);        // Issue #26:麥克風鈕回呼面板
+            UiBuilderKit.SetPrivate(micHold, "_image", micBtnImg);        // 按住回饋:改色
+            UiBuilderKit.SetPrivate(micHold, "_label", micLabel);         // 按住回饋:換字
             UnityEditor.Events.UnityEventTools.AddPersistentListener(sendBtn.onClick, chatPanel.OnSendButton);
             UnityEditor.Events.UnityEventTools.AddVoidPersistentListener(input.onSubmit, chatPanel.OnSendButton);
             UnityEditor.Events.UnityEventTools.AddPersistentListener(closeBtn.onClick, chatPanel.Close);

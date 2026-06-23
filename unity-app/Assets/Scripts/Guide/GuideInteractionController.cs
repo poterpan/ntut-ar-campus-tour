@@ -50,6 +50,8 @@ namespace NtutAR.Guide
                 _panel.SetBusy(true);
                 _ = _chat.AskAsync(question);
             };
+            // 延遲提示:文字已出、語音生成中 → 面板顯示「正在生成語音…」
+            _chat.SpeechPreparingChanged += preparing => _panel.SetSpeechPreparing(preparing);
 
             // Issue #26 STT:麥克風按住/放開 → 啟動/停止語音擷取(留空則不開)
             _speech = _speechBehaviour as ISpeechInput;
