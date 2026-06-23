@@ -10,10 +10,11 @@ namespace NtutAR.Cat
 {
     /// <summary>
     /// 全域召喚貓咪流程(Pokemon Go 式):
-    /// 點擊畫面下方的罐頭按鈕進入放置模式 → 點擊畫面任一處,
-    /// 對 AR 平面 raycast 放置罐頭 → 貓咪從罐頭後方生成、跑去吃 →
-    /// 吃完停留一段時間後消失。
+    /// 點擊畫面下方的罐頭按鈕進入放置模式 → 點擊畫面任一處,對 AR 平面 raycast 放置罐頭。
+    /// 放置模式維持武裝,可連續放多顆罐頭(Issue #25);貓咪會挑「最近」的罐頭去吃,
+    /// 吃完一顆就接續去吃下一顆,場上全部吃完後停留一段時間才消失。
     /// 在 Editor / 無 AR 環境會自動 fallback 到 Physics.Raycast(打場景 Collider)。
+    /// Q-table 與 CatQLearningAgent 完全不需更動 —— 多罐頭只是 controller 層的調度。
     /// </summary>
     public class CatSummonController : MonoBehaviour
     {
@@ -35,12 +36,13 @@ namespace NtutAR.Cat
         [Header("參數")]
         [Tooltip("貓咪生成位置與罐頭的距離(公尺)")]
         [SerializeField] private float _catSpawnDistance = 2.5f;
-        [Tooltip("吃完罐頭後貓咪停留幾秒才消失")]
+        [Tooltip("場上罐頭全部吃完後,貓咪停留幾秒才消失")]
         [SerializeField] private float _despawnDelay = 6f;
 
         private bool _placementArmed;
         private CatQLearningAgent _activeCat;
-        private GameObject _activeCan;
+        private readonly List<GameObject> _activeCans = new List<GameObject>();
+        private GameObject _currentTargetCan;   // 貓咪當前指定要吃的那顆(吃到時就銷毀它)
         private Coroutine _despawnRoutine;
 
         private static readonly List<ARRaycastHit> _arHits = new List<ARRaycastHit>();
@@ -70,14 +72,15 @@ namespace NtutAR.Cat
             PlaceCanAtScreenPoint(screenPos);
         }
 
-        /// <summary>切換放置模式(罐頭按鈕觸發)</summary>
+        /// <summary>切換放置模式(罐頭按鈕觸發)。武裝期間可連續放多顆罐頭。</summary>
         public void TogglePlacementMode()
         {
             SetPlacementArmed(!_placementArmed);
         }
 
         /// <summary>
-        /// 對畫面座標做 raycast 放置罐頭並召喚貓咪。
+        /// 對畫面座標做 raycast 放置一顆「新」罐頭並(必要時)召喚貓咪。
+        /// 放置後維持武裝以連續放置(Issue #25);使用者再按罐頭鈕即結束放置。
         /// 公開供測試與之後的「拋出」模式重用(拋出只需換落點計算,落地後走同一條路)。
         /// </summary>
         public bool PlaceCanAtScreenPoint(Vector2 screenPos)
@@ -87,8 +90,7 @@ namespace NtutAR.Cat
                 return false;
             }
 
-            SpawnOrMoveCan(hitPoint);
-            SetPlacementArmed(false);
+            SpawnCan(hitPoint);
             return true;
         }
 
@@ -153,31 +155,26 @@ namespace NtutAR.Cat
             return false;
         }
 
-        private void SpawnOrMoveCan(Vector3 position)
+        private void SpawnCan(Vector3 position)
         {
-            // 又丟了一個罐頭:取消進行中的消失倒數
+            // 場上又有食物了:取消進行中的消失倒數
             if (_despawnRoutine != null)
             {
                 StopCoroutine(_despawnRoutine);
                 _despawnRoutine = null;
             }
 
-            if (_activeCan == null)
-            {
-                _activeCan = Instantiate(_canPrefab, position, Quaternion.identity);
-            }
-            else
-            {
-                _activeCan.transform.position = position;
-            }
+            var can = Instantiate(_canPrefab, position, Quaternion.identity);
+            _activeCans.Add(can);
 
+            // 第一次放罐頭才生成貓咪
             if (_activeCat == null)
             {
                 _activeCat = Instantiate(_catPrefab, GetCatSpawnPosition(position), Quaternion.identity);
                 _activeCat.TargetReached += OnCatReachedCan;
             }
 
-            _activeCat.SetTarget(_activeCan.transform);
+            RetargetNearestCan();
         }
 
         private Vector3 GetCatSpawnPosition(Vector3 canPosition)
@@ -193,14 +190,38 @@ namespace NtutAR.Cat
             return spawnPos;
         }
 
+        /// <summary>把貓咪導向場上最近的一顆罐頭(貪婪策略,與 Q-table 學到的「走向單一目標」一致)。</summary>
+        private void RetargetNearestCan()
+        {
+            PruneCans();
+            if (_activeCat == null) return;
+
+            int idx = NearestIndex(_activeCat.transform.position, CanPositions());
+            _currentTargetCan = idx >= 0 ? _activeCans[idx] : null;
+            _activeCat.SetTarget(_currentTargetCan != null ? _currentTargetCan.transform : null);
+        }
+
         private void OnCatReachedCan()
         {
             CatFed?.Invoke();
-            if (_activeCan != null)
+
+            // 銷毀剛吃掉的「當前目標」罐頭(明確追蹤,不受 ResetEpisode 重置基準影響)
+            if (_currentTargetCan != null)
             {
-                Destroy(_activeCan);
-                _activeCan = null;
+                _activeCans.Remove(_currentTargetCan);
+                Destroy(_currentTargetCan);
+                _currentTargetCan = null;
             }
+            PruneCans();
+
+            // 還有罐頭 → 接續去吃下一顆最近的
+            if (_activeCans.Count > 0)
+            {
+                RetargetNearestCan();
+                return;
+            }
+
+            // 場上沒罐頭了 → 啟動消失倒數
             if (_despawnRoutine != null)
             {
                 StopCoroutine(_despawnRoutine);
@@ -218,7 +239,37 @@ namespace NtutAR.Cat
                 Destroy(_activeCat.gameObject);
                 _activeCat = null;
             }
+            _currentTargetCan = null;
             _despawnRoutine = null;
+        }
+
+        private void PruneCans() => _activeCans.RemoveAll(c => c == null);
+
+        private List<Vector3> CanPositions()
+        {
+            var positions = new List<Vector3>(_activeCans.Count);
+            foreach (var c in _activeCans)
+            {
+                positions.Add(c.transform.position);
+            }
+            return positions;
+        }
+
+        /// <summary>回傳 positions 中離 from 最近的索引;空清單回 -1。純函式,方便單元測試。</summary>
+        public static int NearestIndex(Vector3 from, IReadOnlyList<Vector3> positions)
+        {
+            int best = -1;
+            float bestSqr = float.MaxValue;
+            for (int i = 0; i < positions.Count; i++)
+            {
+                float sqr = (positions[i] - from).sqrMagnitude;
+                if (sqr < bestSqr)
+                {
+                    bestSqr = sqr;
+                    best = i;
+                }
+            }
+            return best;
         }
     }
 }

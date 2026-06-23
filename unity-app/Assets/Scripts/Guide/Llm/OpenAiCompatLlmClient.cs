@@ -26,6 +26,8 @@ namespace NtutAR.Guide
         [SerializeField] private int _maxTokens = 500;
         [Tooltip("請求逾時(秒)")]
         [SerializeField] private int _timeoutSeconds = 30;
+        [Tooltip("暫時性錯誤(429/逾時/5xx/斷線)時的最大重試次數;指數退避 1s/2s/4s…")]
+        [SerializeField] private int _maxRetries = LlmRetryPolicy.DefaultMaxRetries;
 
         private string _apiKey;
         private Task _configTask;
@@ -49,29 +51,46 @@ namespace NtutAR.Guide
 
             string url = $"{_apiBaseUrl.TrimEnd('/')}/chat/completions";
             string json = LlmWire.BuildRequestJson(_model, LlmPromptBuilder.Build(poi), question, _maxTokens);
+            byte[] body = Encoding.UTF8.GetBytes(json);
 
-            using var request = new UnityWebRequest(url, "POST");
-            request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
-            request.downloadHandler = new DownloadHandlerBuffer();
-            request.SetRequestHeader("Content-Type", "application/json");
-            request.SetRequestHeader("Authorization", $"Bearer {_apiKey}");
-            request.timeout = _timeoutSeconds;
-
-            await SendAsync(request, ct);
-
-            if (request.result != UnityWebRequest.Result.Success)
+            Exception lastError = null;
+            for (int attempt = 0; attempt <= _maxRetries; attempt++)
             {
-                Debug.LogError($"[Llm] 請求失敗 {request.responseCode} {request.error}\n{request.downloadHandler.text}");
-                throw new Exception($"LLM request failed: {request.responseCode} {request.error}");
+                ct.ThrowIfCancellationRequested();
+
+                using var request = new UnityWebRequest(url, "POST");
+                request.uploadHandler = new UploadHandlerRaw(body);
+                request.downloadHandler = new DownloadHandlerBuffer();
+                request.SetRequestHeader("Content-Type", "application/json");
+                request.SetRequestHeader("Authorization", $"Bearer {_apiKey}");
+                request.timeout = _timeoutSeconds;
+
+                await SendAsync(request, ct);
+
+                if (request.result == UnityWebRequest.Result.Success)
+                {
+                    string answer = LlmWire.ExtractAnswer(request.downloadHandler.text);
+                    if (answer == null)
+                    {
+                        // 解析失敗不是暫時性錯誤,重試也沒用 → 直接拋
+                        Debug.LogWarning($"[Llm] 回應無法解析:{request.downloadHandler.text}");
+                        throw new Exception("LLM response has no parsable content");
+                    }
+                    return answer;
+                }
+
+                long code = request.responseCode;
+                lastError = new Exception($"LLM request failed: {code} {request.error}");
+                bool willRetry = attempt < _maxRetries && LlmRetryPolicy.ShouldRetry(request.result, code);
+                Debug.LogWarning($"[Llm] 請求失敗 (attempt {attempt + 1}/{_maxRetries + 1}) {code} {request.error}" +
+                                 (willRetry ? " → 重試" : "") + $"\n{request.downloadHandler.text}");
+
+                if (!willRetry) break;
+                await Task.Delay(LlmRetryPolicy.BackoffMs(attempt), ct);   // 取消會拋 OperationCanceledException
             }
 
-            string answer = LlmWire.ExtractAnswer(request.downloadHandler.text);
-            if (answer == null)
-            {
-                Debug.LogWarning($"[Llm] 回應無法解析:{request.downloadHandler.text}");
-                throw new Exception("LLM response has no parsable content");
-            }
-            return answer;
+            Debug.LogError($"[Llm] 最終失敗:{lastError?.Message}");
+            throw lastError ?? new Exception("LLM request failed");
         }
 
         /// <summary>讀 StreamingAssets 設定(僅一次,lazy)。找不到檔案不算錯——Inspector 預設值仍可用(但無 key 會在 Ask 時報錯)。</summary>

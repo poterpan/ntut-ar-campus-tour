@@ -2,5 +2,15 @@
     "apiBaseUrl": "https://testvideo.site/v1",
     "model": "gpt-5.5",
     "maxTokens": 500,
-    "apiKey": "把你的 API key 貼在這裡,然後把本檔另存為 llm_config.json(已 gitignore,不會被 commit)"
+    "apiKey": "LLM API key — 把本檔另存為 llm_config.json(已 gitignore)後填入",
+
+    "glmApiKey": "GLM(智譜)key,格式 id.secret;留空則 TTS 降級為靜默",
+    "glmTtsUrl": "https://open.bigmodel.cn/api/paas/v4/audio/speech",
+    "glmTtsModel": "glm-tts",
+    "glmVoice": "xiaochen",
+    "glmSpeed": 1.3,
+
+    "elevenLabsApiKey": "ElevenLabs key;留空則語音輸入(STT)停用",
+    "sttUrl": "https://api.elevenlabs.io/v1/speech-to-text",
+    "sttModel": "scribe_v1"
 }
