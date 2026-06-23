@@ -9,6 +9,10 @@ on:
   #     - 'unity-app/**'
   #     - '.github/workflows/build-android.yml'
 
+# action-gh-release 需要 contents: write 才能建 Release(GITHUB_TOKEN 預設唯讀 → 403)
+permissions:
+  contents: write
+
 concurrency:
   group: build-android-${{ github.ref }}
   cancel-in-progress: true
@@ -20,12 +24,48 @@ jobs:
   build:
     name: Unity Android APK
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # 冷 cache 全程實測 ~60 分鐘(run 27263237632 跑了 59m37s),60 太緊
+    timeout-minutes: 90
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           lfs: false
+
+      # ARCore Extensions 的 Editor/Scripts/Internal/IOSPostProcessBuild.cs 引用
+      # UnityEditor.iOS.Xcode,而 unityci 的 Android-only Docker image 沒裝 iOS module,
+      # Editor 編譯階段直接 CS0234 爆掉(issue #4)。
+      # 修法(只動 CI,不動專案本體):
+      #   1. 依 packages-lock.json 鎖定的 commit clone 同版本套件到 vendor/
+      #   2. 把所有引用 UnityEditor.iOS 的腳本整檔包進 #if UNITY_IOS(Android target 不編譯)
+      #   3. manifest.json 改指本地 vendored 套件(file: 路徑相對 Packages/ 資料夾)
+      - name: Vendor ARCore Extensions(修補 Android-only image 編譯錯誤)
+        run: |
+          set -euo pipefail
+          LOCK="$PROJECT_PATH/Packages/packages-lock.json"
+          HASH=$(jq -r '.dependencies["com.google.ar.core.arfoundation.extensions"].hash' "$LOCK")
+          echo "Pinned ARCore Extensions commit: $HASH"
+          VENDOR_DIR="vendor/arcore-unity-extensions"
+          git clone https://github.com/google-ar/arcore-unity-extensions.git "$VENDOR_DIR"
+          git -C "$VENDOR_DIR" checkout --quiet "$HASH"
+          rm -rf "$VENDOR_DIR/.git"
+
+          # 引用 UnityEditor.iOS 的腳本整檔包 #if UNITY_IOS(Samples~ 不會被編譯,跳過)
+          grep -rl 'UnityEditor\.iOS' "$VENDOR_DIR" --include='*.cs' | grep -v 'Samples~' | while read -r f; do
+            echo "Guarding with UNITY_IOS: $f"
+            sed -i '1s/^\xEF\xBB\xBF//' "$f"   # 去 BOM,避免 #if 插在 BOM 前
+            sed -i '1i #if UNITY_IOS' "$f"
+            printf '\n#endif // UNITY_IOS\n' >> "$f"
+          done
+
+          # manifest 指向本地 vendored 套件;順手清掉 lock 裡的舊 git 條目讓 Unity 重新解析
+          MANIFEST="$PROJECT_PATH/Packages/manifest.json"
+          jq '.dependencies["com.google.ar.core.arfoundation.extensions"] = "file:../../vendor/arcore-unity-extensions"' \
+            "$MANIFEST" > manifest.tmp && mv manifest.tmp "$MANIFEST"
+          jq 'del(.dependencies["com.google.ar.core.arfoundation.extensions"])' \
+            "$LOCK" > lock.tmp && mv lock.tmp "$LOCK"
+          echo "--- manifest.json (arcore entry) ---"
+          grep arcore "$MANIFEST"
 
       # GitHub Linux runner 預設只剩 ~14GB 可用,Unity Android Docker image 太大,
       # 清掉預裝雜物(Android SDK、.NET、Haskell、大型套件等)騰出 ~30GB
@@ -60,7 +100,23 @@ jobs:
           targetPlatform: Android
           buildName: unity-app
           buildsPath: build
-          versioning: Semantic
+          # None:跟 iOS workflow 一致,用 Unity Player Settings 的 bundleVersion。
+          # Semantic 會基於 git working tree 算版號,但上面 vendor step 已改動
+          # manifest/lock → "Branch is dirty. Refusing to base semantic version
+          # on uncommitted changes" 直接拒絕 build。
+          versioning: None
+          # versionCode = run_number:每次 build 遞增,APK 才能原地更新
+          #(同簽名 + versionCode 不降級)。run_number 單調遞增。
+          androidVersionCode: ${{ github.run_number }}
+          # Release keystore 簽名:builder 收到非空 androidKeystoreName 會自動
+          # 設 PlayerSettings.Android.useCustomKeystore = true(故 ProjectSettings.asset
+          # 不必預設 useCustomKeystore,本機開專案也不會因缺 keystore 報錯)。
+          # base64 在 runner 上解碼成 release.keystore;keystore 檔本身不進版控。
+          androidKeystoreName: release.keystore
+          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
+          androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
 
       - name: Upload APK as artifact
         if: always()
@@ -80,8 +136,9 @@ jobs:
           files: build/Android/unity-app.apk
           body: |
             Auto-built Android APK from commit ${{ github.sha }}
+            package: me.panspace.ntutartour ・ release-signed(固定 keystore)
 
-            ⚠️ 目前 Geospatial 在 Android 上不會 work
-            (還沒設定 Android-restricted GCP API key + release keystore 對齊 SHA-1)。
-            這個 APK 適合測 AR 基本功能跟 UI,Geospatial 相關功能會失敗。
-            完整 Android Geospatial 支援預計 W3/W4 處理。
+            ℹ️ 從本版起改用固定 release keystore 簽名。**簽名與先前 debug 版不同,
+            既有測試機要先移除舊版才能安裝**;之後的版本可原地更新(versionCode 遞增)。
+            Geospatial:GCP API key 已填、尚未設應用程式限制(package + SHA-1),
+            定位功能待實機驗證。
