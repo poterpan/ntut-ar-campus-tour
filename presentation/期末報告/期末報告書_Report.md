@@ -118,7 +118,7 @@
 
 1. **AR 定位導覽**:VPS 高精度定位 + POI anchor + 接近觸發。
 2. **虛擬導遊 NPC**:Jenson 角色 + 動畫狀態機 + 走近現身解說。
-3. **LLM 即時對話與語音**:每棟建築專屬人設 prompt + 文字/語音雙向互動。
+3. **LLM 即時對話與語音**:每棟建築專屬知識 prompt + 文字/語音雙向互動。
 4. **AR 校園貓**:Q-Learning 訓練的 NPC,Pokémon Go 式召喚與餵食彩蛋。
 
 ---
@@ -224,13 +224,13 @@ ARCore Geospatial API 透過三項資料源融合定位:
 - **參數**:max tokens 500、timeout 30s
 - **設定載入**:金鑰與 URL 來自 `StreamingAssets/llm_config.json`(已加入 `.gitignore`,CI 由 secret 生成),首次提問時延遲載入,缺檔時退回 Inspector 預設。
 
-### 3.3.2 每棟建築專屬人設 Prompt
+### 3.3.2 每棟建築專屬知識 Prompt
 
 `LlmPromptBuilder` 依當前 POI 組裝 system prompt,核心規則:
 
 - **資料來源限定**:只能根據該 POI 的 `llmSystemPrompt` 上下文回答,避免幻覺。
 - **回答風格**:先直接回答、不照抄整段資料、最多列 6 點、純文字 3–6 句。
-- 帶入 `CURRENT_POI_ID / NAME / CONTEXT`,讓每個地標都有專屬的「人設與知識」。
+- 帶入 `CURRENT_POI_ID / NAME / CONTEXT`,讓每個地標都有專屬的知識上下文。
 
 ### 3.3.3 降級與重試
 
@@ -476,7 +476,7 @@ PlayerPrefs.SetInt("HasDisplayedGeospatialPrivacyPrompt", 1);
 
 1. **AR 定位導覽**:ARCore Geospatial 達公尺以下精度,POI anchor + 30 m 接近觸發,走近即現身。
 2. **虛擬導遊 NPC**:Jenson 角色 + 四動畫狀態機,持續面向使用者,走近 POI 自動解說。
-3. **LLM 即時對話與語音**:每棟建築專屬人設 prompt,文字/語音雙向互動,具降級重試與簡繁修正。
+3. **LLM 即時對話與語音**:每棟建築專屬知識 prompt,文字/語音雙向互動,具降級重試與簡繁修正。
 4. **AR 校園貓**:tabular Q-Learning(1300 episodes)訓練的 NPC,Pokémon Go 式召喚餵食彩蛋。
 
 工程上建立了 iOS / Android **雙平台自動化 CI/CD**、安全的金鑰注入流程與模組化架構。專案歷時約 4 週、約 47 個 commit,從提案到雙平台部署完整落地。

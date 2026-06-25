@@ -226,7 +226,7 @@ const NpcIntro: Page = () => (
           <li>Jenson 角色:皮衣眼鏡造型,暱稱「老黃」</li>
           <li>走近 POI 自動現身、開口解說</li>
           <li>四組動畫:聆聽 / 說話 / 走動 / 揮手</li>
-          <li>面向使用者時平滑轉身、不會瞬間扭頭(Slerp 球面插值補間)</li>
+          <li>使用 Slerp 球面插值，讓 NPC 平滑轉向使用者，避免方向突然跳轉，<br />使互動更自然。</li>
         </ul>
       </div>
     </div>
@@ -244,7 +244,7 @@ const NpcMaking: Page = () => (
         </div>
         <div style={{ marginTop: 36, background: CARD, border: `1px solid ${LINE}`, borderRadius: 16, padding: '28px 30px' }}>
           <div style={{ fontSize: 28, fontWeight: 800, color: AMBER }}>踩雷與解決</div>
-          <div style={{ fontSize: 27, color: MUTED, marginTop: 12, lineHeight: 1.6 }}>綁骨後手臂網格被拉扯沾黏到大腿 → 改成<span style={{ color: GREEN, fontWeight: 700 }}> T-pose 參考圖</span>,蒙皮權重才正確分離,才有流暢動畫。</div>
+          <div style={{ fontSize: 27, color: MUTED, marginTop: 12, lineHeight: 1.6 }}>綁骨後，手臂網格出現拉扯並黏到大腿的問題；因此改用 T-pose 參考圖，讓骨架影響範圍更清楚分離，使動畫表現更流暢。<br />{''}<span style={{ color: GREEN, fontWeight: 700 }}>{''}</span>{''}</div>
         </div>
       </div>
       <div style={{ width: 540, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#15181f', borderRadius: 18, border: `1px solid ${LINE}` }}>
@@ -280,7 +280,7 @@ const UIShot = ({ src, label }: { src: string; label: string }) => (
 const UIUX: Page = () => (
   <Shell eyebrow="DESIGN — UI/UX" title="暖色玻璃擬態設計系統">
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ fontSize: 30, lineHeight: 1.6 }}>皮克敏暖色 + 玻璃擬態(glassmorphism),以程式化 UI builder 產生,風格一致、版控可控。</div>
+      <div style={{ fontSize: 30, lineHeight: 1.6 }}>暖色 + 玻璃擬態(glassmorphism),以程式化 UI builder 產生,風格一致、版控可控。</div>
       <div style={{ display: 'flex', gap: 14, marginTop: 18 }}>
         <Pill c="#E07B00">AccentOrange</Pill><Pill c={GREEN}>ButtonGreen</Pill><Pill c="#B08A4F">WarmBg</Pill><Pill c="#9A7B6A">GlassFill</Pill>
       </div>
@@ -297,10 +297,10 @@ const UIUX: Page = () => (
 const Div3: Page = () => <SectionDivider num="03" who="張凱琳" title="LLM 即時對話 · 語音 pipeline" />;
 
 const LLM: Page = () => (
-  <Shell eyebrow="功能③ LLM 對話" title="每棟建築專屬人設的即時對話">
+  <Shell eyebrow="功能③ LLM 對話" title="每棟建築專屬知識的即時對話">
     <ul style={{ ...bullet, marginBottom: 36 }}>
       <li>用統一介面 <code style={{ color: GREEN }}>ILlmClient</code> 接 LLM,可隨時抽換模型 / 供應商</li>
-      <li>每個 POI 帶專屬 system prompt(該地標的知識與人設)</li>
+      <li>每個 POI 帶專屬 system prompt(載入該地標的專屬知識)</li>
       <li>只依該 POI 上下文回答,避免幻覺;先直答、最多 6 點</li>
     </ul>
     <div style={{ background: CARD, border: `1px solid ${LINE}`, borderRadius: 16, padding: '28px 32px', fontSize: 28, color: MUTED, lineHeight: 1.6 }}>
@@ -310,18 +310,21 @@ const LLM: Page = () => (
 );
 
 const DialogueFlow: Page = () => (
-  <Shell eyebrow="功能③ LLM 對話" title="對話流程與穩定性">
-    <div style={{ display: 'flex', gap: 56, height: '100%' }}>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <ul style={{ ...bullet }}>
-          <li>文字先顯示 → 語音隨後合成播放</li>
-          <li>429 / 逾時 / 5xx → 退避重試(≤2 次)</li>
-          <li>仍失敗 → 友善降級訊息,App 不卡死</li>
-        </ul>
-      </div>
-      <div style={{ width: 660, height: '100%' }}><Figure src={pipeline} maxH={760} /></div>
+  <div style={{ ...fill, background: INK, color: TXT, padding: '84px 120px 70px', position: 'relative', display: 'flex', gap: 48 }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingBottom: 40 }}>
+      <div style={{ color: AMBER, fontSize: 24, fontWeight: 700, letterSpacing: '0.18em', marginBottom: 14 }}>功能③ LLM 對話</div>
+      <h2 style={{ fontFamily: DISPLAY, fontSize: 62, fontWeight: 800, margin: 0, lineHeight: 1.14 }}>對話流程與穩定性</h2>
+      <ul style={{ ...bullet, marginTop: 48 }}>
+        <li>文字先顯示 → 語音隨後合成播放</li>
+        <li>429 / 逾時 / 5xx → 退避重試(≤2 次)</li>
+        <li>仍失敗 → 友善降級訊息,App 不卡死</li>
+      </ul>
     </div>
-  </Shell>
+    <div style={{ width: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <img src={pipeline} style={{ maxWidth: '100%', maxHeight: 910, objectFit: 'contain', borderRadius: 14, border: `1px solid ${LINE}`, background: '#fff', padding: 18, boxShadow: '0 12px 36px rgba(40,40,60,0.10)', boxSizing: 'border-box' }} />
+    </div>
+    <Footer />
+  </div>
 );
 
 const Voice: Page = () => (
@@ -396,7 +399,7 @@ const Results: Page = () => (
     <div style={{ display: 'flex', gap: 28, height: 380 }}>
       <Done t="AR 定位導覽" d="Geospatial 公尺以下精度 + 接近觸發" />
       <Done t="虛擬導遊 NPC" d="Jenson + 動畫狀態機 + 解說" />
-      <Done t="LLM 對話與語音" d="專屬人設 + TTS / STT / 簡繁" />
+      <Done t="LLM 對話與語音" d="專屬知識 + TTS / STT / 簡繁" />
       <Done t="AR 校園貓 RL" d="Q-Learning 1300 episodes" />
     </div>
     <div style={{ marginTop: 40, fontSize: 32, lineHeight: 1.6 }}>
