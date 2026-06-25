@@ -102,3 +102,6 @@ unity-app/[Aa]ssets/[Ss]treamingAssets/aa/*
 # ---- LLM API 設定(含金鑰,絕不入版控;範本見 llm_config.example.json) ----
 unity-app/Assets/StreamingAssets/llm_config.json
 unity-app/Assets/StreamingAssets/llm_config.json.meta
+
+# draw.io desktop autosave backups
+.$*.drawio.bkp

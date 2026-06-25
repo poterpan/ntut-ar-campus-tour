@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="drawio" version="26.0.0"><diagram name="proximity"><mxGraphModel dx="900" dy="600" grid="0" pageWidth="780" pageHeight="620">
+<root><mxCell id="0"/><mxCell id="1" parent="0"/>
+<mxCell id="walk" value="使用者於校園中行走" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#1a2e4a;fontSize=12;" vertex="1" parent="1"><mxGeometry x="300" y="40" width="200" height="50" as="geometry"/></mxCell>
+<mxCell id="poll" value="每秒讀取相機 Geospatial pose" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf2ff;strokeColor=#6c8ebf;fontColor=#1a2e4a;fontSize=12;" vertex="1" parent="1"><mxGeometry x="280" y="150" width="240" height="50" as="geometry"/></mxCell>
+<mxCell id="near" value="PoiService.GetNearest 找最近 POI（Haversine）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf2ff;strokeColor=#6c8ebf;fontColor=#1a2e4a;fontSize=12;" vertex="1" parent="1"><mxGeometry x="270" y="260" width="260" height="56" as="geometry"/></mxCell>
+<mxCell id="dec" value="距離 &lt; 30m ?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#5a4a00;fontSize=11;" vertex="1" parent="1"><mxGeometry x="320" y="376" width="160" height="84" as="geometry"/></mxCell>
+<mxCell id="show" value="導遊 NPC 於該 POI 現身解說" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#274722;fontSize=12;" vertex="1" parent="1"><mxGeometry x="280" y="520" width="240" height="56" as="geometry"/></mxCell>
+<mxCell id="p1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=classic;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="walk" target="poll"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="p2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=classic;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="poll" target="near"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="p3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=classic;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="near" target="dec"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="p4" value="是" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=classic;fontSize=12;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="dec" target="show"><mxGeometry relative="1" as="geometry"/></mxCell>
+<mxCell id="p5" value="否（繼續輪詢）" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=classic;fontSize=12;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="dec" target="poll"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="200" y="418"/><mxPoint x="200" y="175"/></Array></mxGeometry></mxCell>
+</root></mxGraphModel></diagram></mxfile>
