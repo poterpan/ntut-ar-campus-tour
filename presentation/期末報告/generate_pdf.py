@@ -32,18 +32,20 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 from reportlab.lib.fonts import addMapping
 
-# ---- Fonts: embed TrueType (renders everywhere). Fall back to CID if absent. ----
+# ---- Fonts: 微軟正黑體 (Microsoft JhengHei) for all text — CJK + Latin. ----
+_DF = '/Applications/Microsoft Word.app/Contents/Resources/DFonts'
+_MSJH = f'{_DF}/MSJH.ttf'      # 微軟正黑體 Regular
+_MSJHB = f'{_DF}/MSJHBD.ttf'   # 微軟正黑體 Bold
 _UNI = '/System/Library/Fonts/Supplemental/Arial Unicode.ttf'
-_HEIM = '/System/Library/Fonts/STHeiti Medium.ttc'
 try:
-    pdfmetrics.registerFont(TTFont('Uni', _UNI))
-    pdfmetrics.registerFont(TTFont('HeiM', _HEIM, subfontIndex=0))
-    addMapping('Uni', 0, 0, 'Uni')      # normal
-    addMapping('Uni', 1, 0, 'HeiM')     # <b> -> Heiti Medium
-    BASE, BOLD = 'Uni', 'HeiM'
-    CODE_NONASCII = 'Uni'               # wrap non-ASCII runs in code blocks with this
+    pdfmetrics.registerFont(TTFont('MSJH', _MSJH))
+    pdfmetrics.registerFont(TTFont('MSJHB', _MSJHB))
+    pdfmetrics.registerFont(TTFont('Uni', _UNI))   # code-block non-ASCII fallback (box-drawing 等)
+    addMapping('MSJH', 0, 0, 'MSJH')    # normal
+    addMapping('MSJH', 1, 0, 'MSJHB')   # <b> -> 微軟正黑 Bold
+    BASE, BOLD, CODE_NONASCII = 'MSJH', 'MSJHB', 'Uni'
 except Exception as e:                  # portability fallback
-    sys.stderr.write(f'[warn] embedded fonts unavailable ({e}); using STSong-Light CID\n')
+    sys.stderr.write(f'[warn] 微軟正黑 unavailable ({e}); using STSong-Light CID\n')
     pdfmetrics.registerFont(UnicodeCIDFont('STSong-Light'))
     BASE = BOLD = CODE_NONASCII = 'STSong-Light'
 
@@ -137,15 +139,19 @@ def build_code(code_lines):
 
 
 def build_image(path, alt, base_dir, width_mm=None):
-    """Embed an image. Default scales to page width; width_mm pins a smaller size."""
+    """Embed an image, downsampled to ~200dpi of its on-page size and re-encoded
+    (smaller of JPEG-q88 / optimized-PNG) to keep the PDF small. Diagrams stay PNG
+    (lossless, crisp); photos become JPEG. Compressed variants cached in temp."""
     full = path if os.path.isabs(path) else os.path.join(base_dir, path)
     if not os.path.isfile(full):
         return [Paragraph('<i>[image missing: %s]</i>' % path, styles['caption'])]
+    from reportlab.lib.utils import ImageReader
     try:
         from PIL import Image as PILImage
-        w, h = PILImage.open(full).size
+        pil = PILImage.open(full)
+        w, h = pil.size
     except Exception:
-        from reportlab.lib.utils import ImageReader
+        pil = None
         w, h = ImageReader(full).getSize()
     max_w = A4[0] - 40 * mm
     max_h = 135 * mm
@@ -156,7 +162,26 @@ def build_image(path, alt, base_dir, width_mm=None):
         tw, th = max_w, max_w * h / w
         if th > max_h:
             th, tw = max_h, max_h * w / h
-    img = Image(full, width=tw, height=th)
+    src = full
+    if pil is not None:
+        import io, tempfile, hashlib  # noqa
+        target_px = max(1, int(tw / 72.0 * 200))            # ~200 dpi of on-page width
+        if w > target_px:
+            pil = pil.resize((target_px, max(1, round(h * target_px / w))), PILImage.LANCZOS)
+        has_alpha = pil.mode in ('RGBA', 'LA') or (pil.mode == 'P' and 'transparency' in pil.info)
+        cache = os.path.join(tempfile.gettempdir(), 'osd-imgcache')
+        os.makedirs(cache, exist_ok=True)
+        key = hashlib.md5(('%s|%d|%s' % (full, int(tw), os.path.getmtime(full))).encode()).hexdigest()
+        if has_alpha:
+            src = os.path.join(cache, key + '.png')
+            pil.save(src, format='PNG', optimize=True)
+        else:
+            jp = os.path.join(cache, key + '.jpg')
+            pil.convert('RGB').save(jp, format='JPEG', quality=88)
+            pp = os.path.join(cache, key + '.png')
+            pil.save(pp, format='PNG', optimize=True)
+            src = jp if os.path.getsize(jp) <= os.path.getsize(pp) else pp   # smaller wins
+    img = Image(src, width=tw, height=th)
     img.hAlign = 'CENTER'
     out = [Spacer(1, 4), img]
     if alt.strip():
@@ -372,6 +397,8 @@ def main():
     title = sys.argv[3] if len(sys.argv) > 3 else 'NTUT AR Campus Tour — Final Report'
     with open(md_path, 'r', encoding='utf-8') as f:
         md_text = f.read()
+    # 微軟正黑 (MSJH.ttf) 缺 U+2212 數學減號字形 → 統一換成 ASCII 連字號(外觀相同、全字型皆有)
+    md_text = md_text.replace('−', '-')
     doc = ReportDoc(
         pdf_path, pagesize=A4,
         topMargin=25 * mm, bottomMargin=20 * mm,

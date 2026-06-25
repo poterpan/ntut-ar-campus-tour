@@ -23,6 +23,7 @@ import uiPoi from './assets/ui-poi.png';
 import uiHandbook from './assets/ui-handbook.png';
 import appDialogue from './assets/app-dialogue.png';
 import appCat from './assets/app-cat.png';
+import qrTestflight from './assets/qr-testflight.png';
 
 export const design: DesignSystem = {
   palette: { bg: '#F6F4EF', text: '#21252F', accent: '#E07B00' },
@@ -431,13 +432,19 @@ const Conclusion: Page = () => (
 );
 
 const Thanks: Page = () => (
-  <div style={{ ...fill, background: INK, color: TXT, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 140px' }}>
-    <div style={{ width: 96, height: 8, background: AMBER, borderRadius: 4, marginBottom: 36 }} />
-    <h1 style={{ fontFamily: DISPLAY, fontSize: 140, fontWeight: 900, margin: 0 }}>謝謝聆聽</h1>
-    <div style={{ fontSize: 44, color: AMBER, marginTop: 20, fontWeight: 600 }}>Q & A</div>
-    <div style={{ fontSize: 30, color: MUTED, marginTop: 44, lineHeight: 1.7 }}>
-      潘柏嘉 · 簡妤真 · 張凱琳 · 蔡宗育<br />
-      iOS TestFlight　·　Android APK　·　原始碼公開於 GitHub
+  <div style={{ ...fill, background: INK, color: TXT, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 140px' }}>
+    <div>
+      <div style={{ width: 96, height: 8, background: AMBER, borderRadius: 4, marginBottom: 36 }} />
+      <h1 style={{ fontFamily: DISPLAY, fontSize: 140, fontWeight: 900, margin: 0 }}>謝謝聆聽</h1>
+      <div style={{ fontSize: 44, color: AMBER, marginTop: 20, fontWeight: 600 }}>Q & A</div>
+      <div style={{ fontSize: 30, color: MUTED, marginTop: 44, lineHeight: 1.7 }}>
+        潘柏嘉 · 簡妤真 · 張凱琳 · 蔡宗育<br />
+        iOS TestFlight　·　Android APK　·　原始碼公開於 GitHub
+      </div>
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18 }}>
+      <img src={qrTestflight} style={{ width: 360, height: 360, borderRadius: 18, background: '#fff', padding: 18, boxSizing: 'border-box', border: `1px solid ${LINE}` }} />
+      <div style={{ fontSize: 28, color: TXT, fontWeight: 600 }}>掃描體驗 iOS TestFlight</div>
     </div>
   </div>
 );
