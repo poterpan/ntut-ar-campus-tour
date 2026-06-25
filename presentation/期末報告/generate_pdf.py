@@ -1,0 +1,345 @@
+#!/usr/bin/env python3
+"""Generate the final-report PDF from a markdown file, following CLAUDE.md specs.
+
+Usage:
+    python generate_pdf.py <input.md> <output.pdf> ["PDF Title"]
+
+Fonts are EMBEDDED TrueType (Arial Unicode MS for full glyph coverage incl. CJK /
+Greek / math / box-drawing, Heiti TC Medium for bold) so the PDF renders in any
+viewer — unlike the non-embedded STSong-Light CID font, whose CJK glyphs go blank
+where the Adobe Asian font pack is absent.
+
+Handles: 4 heading levels (doc title + chapter # + ## + ###), centered title-block
++ subtitle, green key-takeaways, CJK-safe code blocks (XPreformatted), tables,
+lists, blockquotes, links. Dependencies: reportlab only.
+"""
+
+import re
+import sys
+import os
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+from reportlab.lib.colors import HexColor, black
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.enums import TA_CENTER
+from reportlab.platypus import (
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
+    XPreformatted, HRFlowable, Image
+)
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+from reportlab.lib.fonts import addMapping
+
+# ---- Fonts: embed TrueType (renders everywhere). Fall back to CID if absent. ----
+_UNI = '/System/Library/Fonts/Supplemental/Arial Unicode.ttf'
+_HEIM = '/System/Library/Fonts/STHeiti Medium.ttc'
+try:
+    pdfmetrics.registerFont(TTFont('Uni', _UNI))
+    pdfmetrics.registerFont(TTFont('HeiM', _HEIM, subfontIndex=0))
+    addMapping('Uni', 0, 0, 'Uni')      # normal
+    addMapping('Uni', 1, 0, 'HeiM')     # <b> -> Heiti Medium
+    BASE, BOLD = 'Uni', 'HeiM'
+    CODE_NONASCII = 'Uni'               # wrap non-ASCII runs in code blocks with this
+except Exception as e:                  # portability fallback
+    sys.stderr.write(f'[warn] embedded fonts unavailable ({e}); using STSong-Light CID\n')
+    pdfmetrics.registerFont(UnicodeCIDFont('STSong-Light'))
+    BASE = BOLD = CODE_NONASCII = 'STSong-Light'
+
+# Colors from CLAUDE.md
+NAVY = HexColor('#1a1a2e')
+H1_COLOR = HexColor('#16213e')
+H2_COLOR = HexColor('#0f3460')
+H3_COLOR = HexColor('#3a5a78')
+CODE_BG = HexColor('#f5f5f5')
+TABLE_HEADER_BG = HexColor('#e8eaf6')
+BODY_COLOR = HexColor('#333333')
+GREEN = HexColor('#2e7d32')
+LINK_COLOR = HexColor('#1565c0')
+QUOTE_BG = HexColor('#fff3e0')
+
+styles = {
+    'title': ParagraphStyle('Title', fontSize=21, leading=27, textColor=NAVY,
+                            alignment=TA_CENTER, spaceAfter=6, fontName=BOLD),
+    'subtitle': ParagraphStyle('Subtitle', fontSize=12, leading=17, textColor=H2_COLOR,
+                            alignment=TA_CENTER, spaceAfter=8, fontName=BOLD),
+    'info': ParagraphStyle('Info', fontSize=10, leading=15, textColor=BODY_COLOR,
+                            alignment=TA_CENTER, spaceAfter=3, fontName=BASE),
+    'h1': ParagraphStyle('H1', fontSize=16, leading=22, textColor=H1_COLOR,
+                            spaceBefore=16, spaceAfter=8, fontName=BOLD),
+    'h2': ParagraphStyle('H2', fontSize=13, leading=18, textColor=H2_COLOR,
+                            spaceBefore=12, spaceAfter=6, fontName=BOLD),
+    'h3': ParagraphStyle('H3', fontSize=11, leading=16, textColor=H3_COLOR,
+                            spaceBefore=8, spaceAfter=4, fontName=BOLD),
+    'body': ParagraphStyle('Body', fontSize=10, leading=15.5, textColor=BODY_COLOR,
+                            spaceAfter=6, fontName=BASE),
+    'bullet': ParagraphStyle('Bullet', fontSize=10, leading=15.5, textColor=BODY_COLOR,
+                            leftIndent=20, bulletIndent=8, spaceAfter=3, fontName=BASE),
+    'code': ParagraphStyle('Code', fontSize=8.5, leading=12, textColor=black,
+                            fontName='Courier', backColor=CODE_BG, borderPadding=6,
+                            leftIndent=8, rightIndent=8, spaceAfter=8),
+    'takeaway': ParagraphStyle('Takeaway', fontSize=10, leading=15.5, textColor=GREEN,
+                            spaceAfter=6, fontName=BOLD, leftIndent=6),
+    'link': ParagraphStyle('Link', fontSize=10, leading=15, textColor=LINK_COLOR,
+                            alignment=TA_CENTER, spaceAfter=6, fontName=BASE),
+    'quote': ParagraphStyle('Quote', fontSize=9.5, leading=14, textColor=HexColor('#8a5a00'),
+                            leftIndent=14, spaceAfter=8, fontName=BASE,
+                            backColor=QUOTE_BG, borderPadding=6),
+    'caption': ParagraphStyle('Caption', fontSize=9, leading=13, textColor=HexColor('#666666'),
+                            alignment=TA_CENTER, spaceBefore=2, spaceAfter=10, fontName=BASE),
+}
+
+# Emoji / symbols absent from the fonts -> strip
+_EMOJI = ['🟢', '✅', '✔', '▶', '★', '🆕', '📇', '📊', '⚠️', '⚠', '👍', '✓']
+# Box-drawing -> ASCII keeps code-block alignment in monospace Courier
+_BOX = {ord(c): '+' for c in '┌┐└┘├┤┬┴┼╭╮╰╯'}
+_BOX[ord('─')] = '-'
+_BOX[ord('│')] = '|'
+
+
+def sanitize(text):
+    for e in _EMOJI:
+        text = text.replace(e, '')
+    return text.replace('…', '...')
+
+
+def _inline_code(m):
+    """Render inline `code`: ASCII in Courier, CJK/non-ASCII runs in the base font."""
+    parts = re.split(r'([^\x00-\x7F]+)', m.group(1))
+    out = ''
+    for k, p in enumerate(parts):
+        if not p:
+            continue
+        face = BASE if k % 2 == 1 else 'Courier'   # odd indices = non-ASCII runs
+        out += '<font face="%s" size="9" color="#c62828">%s</font>' % (face, p)
+    return out
+
+
+def format_inline(text):
+    """Inline markdown -> ReportLab mini-XML. Base font covers CJK/Greek/math."""
+    text = sanitize(text)
+    text = re.sub(r'\*\*`([^`]+)`\*\*', r'<b><font face="Courier" size="9">\1</font></b>', text)
+    text = re.sub(r'\*\*([^*]+)\*\*', r'<b>\1</b>', text)
+    text = re.sub(r'`([^`]+)`', _inline_code, text)
+    text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2" color="#1565c0">\1</a>', text)
+    return text
+
+
+def build_code(code_lines):
+    code_text = '\n'.join(code_lines).translate(_BOX)
+    code_text = code_text.replace("maxₐ'", "max_a'").replace('ₐ', 'a')
+    code_text = sanitize(code_text)
+    code_text = code_text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+    # wrap non-ASCII runs (CJK / Greek / box) in a full-coverage font; Latin stays Courier
+    code_text = re.sub(r'([^\x00-\x7F]+)', r'<font face="%s">\1</font>' % CODE_NONASCII, code_text)
+    return XPreformatted(code_text, styles['code'])
+
+
+def build_image(path, alt, base_dir):
+    """Embed an image scaled to page width, with an optional centered caption."""
+    full = path if os.path.isabs(path) else os.path.join(base_dir, path)
+    if not os.path.isfile(full):
+        return [Paragraph('<i>[image missing: %s]</i>' % path, styles['caption'])]
+    try:
+        from PIL import Image as PILImage
+        w, h = PILImage.open(full).size
+    except Exception:
+        from reportlab.lib.utils import ImageReader
+        w, h = ImageReader(full).getSize()
+    max_w = A4[0] - 40 * mm
+    max_h = 135 * mm
+    tw, th = max_w, max_w * h / w
+    if th > max_h:
+        th, tw = max_h, max_h * w / h
+    img = Image(full, width=tw, height=th)
+    img.hAlign = 'CENTER'
+    out = [Spacer(1, 4), img]
+    if alt.strip():
+        out.append(Paragraph(sanitize(alt), styles['caption']))
+    else:
+        out.append(Spacer(1, 8))
+    return out
+
+
+def parse_table(lines):
+    rows = []
+    for line in lines:
+        line = line.strip()
+        if line.startswith('|') and not re.match(r'^\|[\s\-:|]+\|$', line):
+            rows.append([c.strip() for c in line.split('|')[1:-1]])
+    return rows
+
+
+def build_table(rows):
+    if not rows:
+        return None
+    formatted = []
+    for i, row in enumerate(rows):
+        frow = []
+        for cell in row:
+            if i == 0:
+                st = ParagraphStyle('TH', fontSize=9, leading=12, fontName=BOLD, textColor=H1_COLOR)
+            else:
+                st = ParagraphStyle('TD', fontSize=9, leading=12.5, fontName=BASE, textColor=BODY_COLOR)
+            frow.append(Paragraph(format_inline(cell), st))
+        formatted.append(frow)
+    num_cols = len(formatted[0])
+    available = A4[0] - 40 * mm
+    if num_cols == 2:
+        col_widths = [available * 0.32, available * 0.68]
+    elif num_cols == 3:
+        col_widths = [available * 0.16, available * 0.30, available * 0.54]
+    else:
+        col_widths = [available / num_cols] * num_cols
+    table = Table(formatted, colWidths=col_widths, repeatRows=1)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), TABLE_HEADER_BG),
+        ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#cccccc')),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+    ]))
+    return table
+
+
+_INFO_PREFIXES = ('**課程**', '**組員**', '**日期**', '**Course**', '**Team**', '**Date**')
+
+
+def parse_markdown(md_text, base_dir='.'):
+    story = []
+    lines = md_text.split('\n')
+    i = 0
+    title_done = False
+    expect_subtitle = False
+
+    while i < len(lines):
+        line = lines[i]
+        stripped = line.strip()
+        if not stripped:
+            i += 1
+            continue
+
+        m = re.match(r'^(#{1,6})\s+(.*)', stripped)
+        if m:
+            level, text = len(m.group(1)), m.group(2)
+            if level == 1 and not title_done:
+                story.append(Paragraph(sanitize(text), styles['title']))
+                title_done = True
+                expect_subtitle = True
+                i += 1
+                continue
+            if level == 3 and expect_subtitle:
+                story.append(Paragraph(sanitize(text), styles['subtitle']))
+                expect_subtitle = False
+                i += 1
+                continue
+            expect_subtitle = False
+            key = {1: 'h1', 2: 'h2'}.get(level, 'h3')
+            story.append(Paragraph(format_inline(text), styles[key]))
+            i += 1
+            continue
+        expect_subtitle = False
+
+        if stripped.startswith(_INFO_PREFIXES):
+            story.append(Paragraph(format_inline(stripped), styles['info']))
+            i += 1
+            continue
+
+        low = stripped.lower()
+        if ('demo' in low or '影片' in stripped or 'video' in low) and '](' in stripped:
+            story.append(Paragraph(format_inline(stripped), styles['link']))
+            i += 1
+            continue
+
+        if stripped == '---':
+            story.append(Spacer(1, 3))
+            story.append(HRFlowable(width="100%", thickness=0.5, color=HexColor('#cccccc')))
+            story.append(Spacer(1, 3))
+            i += 1
+            continue
+
+        if '🟢' in stripped or stripped.startswith('> **Key Takeaway'):
+            t = stripped[2:] if stripped.startswith('> ') else stripped
+            story.append(Paragraph(format_inline(t), styles['takeaway']))
+            i += 1
+            continue
+
+        img_m = re.match(r'^!\[([^\]]*)\]\(([^)]+)\)\s*$', stripped)
+        if img_m:
+            for fl in build_image(img_m.group(2), img_m.group(1), base_dir):
+                story.append(fl)
+            i += 1
+            continue
+
+        if stripped.startswith('```'):
+            code_lines = []
+            i += 1
+            while i < len(lines) and not lines[i].strip().startswith('```'):
+                code_lines.append(lines[i])
+                i += 1
+            i += 1
+            story.append(build_code(code_lines))
+            continue
+
+        if stripped.startswith('> '):
+            story.append(Paragraph(format_inline(stripped[2:]), styles['quote']))
+            i += 1
+            continue
+
+        if stripped.startswith('|'):
+            table_lines = []
+            while i < len(lines) and lines[i].strip().startswith('|'):
+                table_lines.append(lines[i])
+                i += 1
+            tbl = build_table(parse_table(table_lines))
+            if tbl:
+                story.append(tbl)
+                story.append(Spacer(1, 6))
+            continue
+
+        bm = re.match(r'^(\s*)-\s+(.*)', line)
+        if bm:
+            indent = len(bm.group(1))
+            st = ParagraphStyle('B', parent=styles['bullet'],
+                                leftIndent=20 + indent, bulletIndent=8 + indent)
+            story.append(Paragraph(format_inline(bm.group(2)), st, bulletText='•'))
+            i += 1
+            continue
+
+        nm = re.match(r'^(\s*)(\d+)\.\s+(.*)', line)
+        if nm:
+            indent = len(nm.group(1))
+            st = ParagraphStyle('N', parent=styles['bullet'],
+                                leftIndent=20 + indent, bulletIndent=8 + indent)
+            story.append(Paragraph(format_inline(nm.group(3)), st, bulletText=f'{nm.group(2)}.'))
+            i += 1
+            continue
+
+        story.append(Paragraph(format_inline(stripped), styles['body']))
+        i += 1
+
+    return story
+
+
+def main():
+    if len(sys.argv) < 3:
+        print(__doc__)
+        sys.exit(1)
+    md_path, pdf_path = sys.argv[1], sys.argv[2]
+    title = sys.argv[3] if len(sys.argv) > 3 else 'NTUT AR Campus Tour — Final Report'
+    with open(md_path, 'r', encoding='utf-8') as f:
+        md_text = f.read()
+    doc = SimpleDocTemplate(
+        pdf_path, pagesize=A4,
+        topMargin=25 * mm, bottomMargin=20 * mm,
+        leftMargin=20 * mm, rightMargin=20 * mm,
+        title=title, author='NTUT Group 4',
+    )
+    doc.build(parse_markdown(md_text, base_dir=os.path.dirname(os.path.abspath(md_path))))
+    print(f'PDF generated: {pdf_path}  ({os.path.getsize(pdf_path)//1024} KB)')
+
+
+if __name__ == '__main__':
+    main()
