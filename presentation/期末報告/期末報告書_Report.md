@@ -8,7 +8,7 @@
 **組員**:潘柏嘉、簡妤真、張凱琳、蔡宗育
 **日期**:2026 年 6 月
 
-**Demo 影片**:[https://youtu.be/xxxxxxxx](https://youtu.be/xxxxxxxx) ｜（正式連結待補)
+**Demo 影片**:[https://youtu.be/p-2S3pdHWJw](https://youtu.be/p-2S3pdHWJw)
 
 **App 下載 / 試用 / 原始碼**
 - <img src="figures/icon-apple.png" width="12" height="15" valign="middle"/>　iOS(TestFlight 公開測試):[https://testflight.apple.com/join/GFagNNEY](https://testflight.apple.com/join/GFagNNEY)
@@ -535,7 +535,7 @@ PlayerPrefs.SetInt("HasDisplayedGeospatialPrivacyPrompt", 1);
 
 ## B. 公開連結與原始碼
 
-- Demo 影片:[https://youtu.be/xxxxxxxx](https://youtu.be/xxxxxxxx)（正式連結待補)
+- Demo 影片:[https://youtu.be/p-2S3pdHWJw](https://youtu.be/p-2S3pdHWJw)
 - iOS(TestFlight 公開測試):[https://testflight.apple.com/join/GFagNNEY](https://testflight.apple.com/join/GFagNNEY)
 - Android(APK)/ 版本發佈:[https://github.com/poterpan/ntut-ar-campus-tour/releases/tag/v1.0.0](https://github.com/poterpan/ntut-ar-campus-tour/releases/tag/v1.0.0)
 - 原始碼(GitHub,公開):[https://github.com/poterpan/ntut-ar-campus-tour](https://github.com/poterpan/ntut-ar-campus-tour)

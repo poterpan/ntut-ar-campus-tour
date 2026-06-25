@@ -54,8 +54,8 @@ export const transition: SlideTransition = {
 };
 
 // ---------- shared helpers ----------
-const Footer = () => (
-  <div style={{ position: 'absolute', left: 120, right: 120, bottom: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 22, color: MUTED, borderTop: `1px solid ${LINE}`, paddingTop: 14 }}>
+const Footer = ({ line = true }: { line?: boolean }) => (
+  <div style={{ position: 'absolute', left: 120, right: 120, bottom: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 22, color: MUTED, borderTop: line ? `1px solid ${LINE}` : 'none', paddingTop: 14 }}>
     <span>北科 AR 校園導覽 — LLM 導遊與 AI 互動體驗</span>
     <span>NTUT · 2026</span>
   </div>
@@ -323,7 +323,7 @@ const DialogueFlow: Page = () => (
     <div style={{ width: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <img src={pipeline} style={{ maxWidth: '100%', maxHeight: 910, objectFit: 'contain', borderRadius: 14, border: `1px solid ${LINE}`, background: '#fff', padding: 18, boxShadow: '0 12px 36px rgba(40,40,60,0.10)', boxSizing: 'border-box' }} />
     </div>
-    <Footer />
+    <Footer line={false} />
   </div>
 );
 
@@ -391,6 +391,7 @@ const Demo: Page = () => (
     <div style={{ width: 0, height: 0, borderTop: '46px solid transparent', borderBottom: '46px solid transparent', borderLeft: `78px solid ${AMBER}`, marginLeft: 20 }} />
     <div style={{ fontFamily: DISPLAY, fontSize: 130, fontWeight: 900 }}>Demo 影片</div>
     <div style={{ fontSize: 38, color: MUTED }}>四大功能整合實機演示 — 定位 → 導遊 → 語音問答 → 校園貓</div>
+    <a href="https://youtu.be/p-2S3pdHWJw" style={{ fontSize: 30, color: AMBER, textDecoration: 'none', marginTop: 4 }}>youtu.be/p-2S3pdHWJw</a>
   </div>
 );
 
