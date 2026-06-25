@@ -172,6 +172,10 @@ ARCore Geospatial API 透過三項資料源融合定位:
 
 ![導遊 NPC 的生成依據:AI 生成的角色概念圖(後續經 Meshy 轉為 3D 模型)](figures/npc-concept.png){w=58}
 
+**綁定踩雷與解決(T-pose 參考圖)**:Meshy 自動生成的模型在**骨骼綁定(rigging)後**,手臂網格會錯誤地被拉扯、沾黏到大腿——動作預覽時手部嚴重變形(如下圖)。我們嘗試多種調整,最後發現關鍵是**在生成階段就輸入一張標準 T-pose(雙臂水平張開)的參考圖**:讓模型以四肢分離的姿勢建模,蒙皮權重(skinning)才能正確區分手臂與軀幹,徹底解決拉扯問題,也才有後續流暢的四組動畫。
+
+![骨骼綁定初期:手部網格被拉扯沾黏到大腿(動作預覽嚴重變形)→ 改用 T-pose 參考圖後解決](figures/npc-rig-issue.png){w=68}
+
 關鍵互動類別:
 
 - `GuideInteractionController`:主協調者。在 POI anchor 位置生成 / 銷毀 NPC prefab,將對話委派給 `GuideChatController`,並依對話狀態驅動動畫。NPC **每幀以 `Slerp` 平滑面向相機**(`TickFaceCamera()`,轉速 5),確保導遊永遠看著使用者。
