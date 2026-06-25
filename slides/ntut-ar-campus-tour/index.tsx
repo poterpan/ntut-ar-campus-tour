@@ -17,6 +17,12 @@ import npcStates from './assets/npc-states.png';
 import pipeline from './assets/pipeline.png';
 import rlStates from './assets/rl-states.png';
 import qloop from './assets/qloop.png';
+import uiOnboarding from './assets/ui-onboarding.png';
+import uiHud from './assets/ui-hud.png';
+import uiPoi from './assets/ui-poi.png';
+import uiHandbook from './assets/ui-handbook.png';
+import appDialogue from './assets/app-dialogue.png';
+import appCat from './assets/app-cat.png';
 
 export const design: DesignSystem = {
   palette: { bg: '#F6F4EF', text: '#21252F', accent: '#E07B00' },
@@ -52,13 +58,6 @@ const Footer = () => (
   <div style={{ position: 'absolute', left: 120, right: 120, bottom: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 22, color: MUTED, borderTop: `1px solid ${LINE}`, paddingTop: 14 }}>
     <span>北科 AR 校園導覽 — LLM 導遊與 AI 互動體驗</span>
     <span>NTUT · 2026</span>
-  </div>
-);
-
-const Placeholder = ({ hint }: { hint: string }) => (
-  <div style={{ width: '100%', height: '100%', minHeight: 440, border: `2px dashed ${LINE}`, borderRadius: 18, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, background: CARD }}>
-    <div style={{ fontSize: 26, color: AMBER, letterSpacing: '0.15em', fontWeight: 700 }}>實機截圖</div>
-    <div style={{ fontSize: 28, color: MUTED, textAlign: 'center', padding: '0 40px', lineHeight: 1.5 }}>{hint}</div>
   </div>
 );
 
@@ -227,7 +226,7 @@ const NpcIntro: Page = () => (
           <li>Jenson 角色:皮衣眼鏡造型,暱稱「老黃」</li>
           <li>走近 POI 自動現身、開口解說</li>
           <li>四組動畫:聆聽 / 說話 / 走動 / 揮手</li>
-          <li>持續以 Slerp 平滑面向使用者</li>
+          <li>面向使用者時平滑轉身、不會瞬間扭頭(Slerp 球面插值補間)</li>
         </ul>
       </div>
     </div>
@@ -245,7 +244,7 @@ const NpcMaking: Page = () => (
         </div>
         <div style={{ marginTop: 36, background: CARD, border: `1px solid ${LINE}`, borderRadius: 16, padding: '28px 30px' }}>
           <div style={{ fontSize: 28, fontWeight: 800, color: AMBER }}>踩雷與解決</div>
-          <div style={{ fontSize: 27, color: MUTED, marginTop: 12, lineHeight: 1.6 }}>綁骨後手臂網格被拉扯沾黏到大腿 → 改餵<span style={{ color: GREEN, fontWeight: 700 }}> T-pose 參考圖</span>,蒙皮權重才正確分離,才有流暢動畫。</div>
+          <div style={{ fontSize: 27, color: MUTED, marginTop: 12, lineHeight: 1.6 }}>綁骨後手臂網格被拉扯沾黏到大腿 → 改成<span style={{ color: GREEN, fontWeight: 700 }}> T-pose 參考圖</span>,蒙皮權重才正確分離,才有流暢動畫。</div>
         </div>
       </div>
       <div style={{ width: 540, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#15181f', borderRadius: 18, border: `1px solid ${LINE}` }}>
@@ -257,30 +256,39 @@ const NpcMaking: Page = () => (
 
 const Dialogue: Page = () => (
   <Shell eyebrow="功能② 虛擬導遊" title="對話介面與動畫狀態機">
-    <div style={{ height: 300, marginBottom: 8 }}><Figure src={npcStates} maxH={300} /></div>
-    <ul style={{ ...bullet, marginTop: 24 }}>
-      <li>對話面板顯示「老黃思考中…」「正在生成語音…」狀態</li>
-      <li>送出時鎖定按鈕,避免重複送出</li>
-      <li>文字先上畫面 → 語音隨後播放,NPC 同步切換動畫</li>
-    </ul>
+    <div style={{ display: 'flex', gap: 56, height: '100%' }}>
+      <img src={appDialogue} style={{ height: '100%', maxHeight: 720, objectFit: 'contain', borderRadius: 24, border: `1px solid ${LINE}`, alignSelf: 'center' }} />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div style={{ height: 210, marginBottom: 30 }}><Figure src={npcStates} maxH={210} /></div>
+        <ul style={{ ...bullet }}>
+          <li>對話面板顯示「老黃思考中…」「正在生成語音…」狀態</li>
+          <li>送出時鎖定按鈕,避免重複送出</li>
+          <li>文字先上畫面 → 語音隨後播放,NPC 同步切換動畫</li>
+        </ul>
+      </div>
+    </div>
   </Shell>
 );
 
+const UIShot = ({ src, label }: { src: string; label: string }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+    <img src={src} style={{ height: 520, objectFit: 'contain', borderRadius: 18, border: `1px solid ${LINE}`, boxShadow: '0 8px 24px rgba(40,40,60,0.10)' }} />
+    <div style={{ fontSize: 24, color: MUTED }}>{label}</div>
+  </div>
+);
+
 const UIUX: Page = () => (
-  <Shell eyebrow="DESIGN — UI/UX" title="暖色毛玻璃設計系統">
-    <div style={{ display: 'flex', gap: 48, height: '100%' }}>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <div style={{ fontSize: 32, lineHeight: 1.7, marginBottom: 24 }}>皮克敏暖色 + 毛玻璃(glassmorphism),程式化 UI builder 產生,風格一致、版控可控。</div>
-        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-          <Pill c="#F57C00">AccentOrange</Pill>
-          <Pill c={GREEN}>ButtonGreen</Pill>
-          <Pill c="#C9B79C">WarmBg</Pill>
-          <Pill c="#A1887F">GlassFill</Pill>
-        </div>
-        <div style={{ fontSize: 26, color: MUTED, marginTop: 28 }}>主要畫面:開場 / HUD / POI 抽屜 / 探索手帳</div>
+  <Shell eyebrow="DESIGN — UI/UX" title="暖色玻璃擬態設計系統">
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ fontSize: 30, lineHeight: 1.6 }}>皮克敏暖色 + 玻璃擬態(glassmorphism),以程式化 UI builder 產生,風格一致、版控可控。</div>
+      <div style={{ display: 'flex', gap: 14, marginTop: 18 }}>
+        <Pill c="#E07B00">AccentOrange</Pill><Pill c={GREEN}>ButtonGreen</Pill><Pill c="#B08A4F">WarmBg</Pill><Pill c="#9A7B6A">GlassFill</Pill>
       </div>
-      <div style={{ width: 720 }}>
-        <Placeholder hint="實機 UI 畫面(開場 / HUD / POI 抽屜 / 探索手帳)" />
+      <div style={{ flex: 1, display: 'flex', gap: 40, justifyContent: 'center', alignItems: 'center' }}>
+        <UIShot src={uiOnboarding} label="開場 Onboarding" />
+        <UIShot src={uiHud} label="AR HUD 主畫面" />
+        <UIShot src={uiPoi} label="POI 景點抽屜" />
+        <UIShot src={uiHandbook} label="探索手帳" />
       </div>
     </div>
   </Shell>
@@ -291,8 +299,8 @@ const Div3: Page = () => <SectionDivider num="03" who="張凱琳" title="LLM 即
 const LLM: Page = () => (
   <Shell eyebrow="功能③ LLM 對話" title="每棟建築專屬人設的即時對話">
     <ul style={{ ...bullet, marginBottom: 36 }}>
-      <li>以介面 <code style={{ color: GREEN }}>ILlmClient</code> 抽象,實作 OpenAI 相容 <code style={{ color: GREEN }}>gpt-5.5</code></li>
-      <li>每個 POI 帶專屬 system prompt(人設與知識)</li>
+      <li>用統一介面 <code style={{ color: GREEN }}>ILlmClient</code> 接 LLM,可隨時抽換模型 / 供應商</li>
+      <li>每個 POI 帶專屬 system prompt(該地標的知識與人設)</li>
       <li>只依該 POI 上下文回答,避免幻覺;先直答、最多 6 點</li>
     </ul>
     <div style={{ background: CARD, border: `1px solid ${LINE}`, borderRadius: 16, padding: '28px 32px', fontSize: 28, color: MUTED, lineHeight: 1.6 }}>
@@ -303,15 +311,15 @@ const LLM: Page = () => (
 
 const DialogueFlow: Page = () => (
   <Shell eyebrow="功能③ LLM 對話" title="對話流程與穩定性">
-    <div style={{ display: 'flex', gap: 48, height: '100%' }}>
-      <div style={{ width: 540 }}><Figure src={pipeline} maxH={620} /></div>
+    <div style={{ display: 'flex', gap: 56, height: '100%' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <ul style={{ ...bullet }}>
           <li>文字先顯示 → 語音隨後合成播放</li>
-          <li>429 / 逾時 / 5xx → 指數退避重試(≤2 次)</li>
+          <li>429 / 逾時 / 5xx → 退避重試(≤2 次)</li>
           <li>仍失敗 → 友善降級訊息,App 不卡死</li>
         </ul>
       </div>
+      <div style={{ width: 660, height: '100%' }}><Figure src={pipeline} maxH={760} /></div>
     </div>
   </Shell>
 );
@@ -319,8 +327,8 @@ const DialogueFlow: Page = () => (
 const Voice: Page = () => (
   <Shell eyebrow="VOICE — 語音 pipeline" title="TTS · STT · 簡繁轉換">
     <div style={{ display: 'flex', gap: 32, height: 460 }}>
-      <VCard t="GLM TTS" d="念出回答。音色「小陳」、語速 1.3×;以能量偵測裁掉免費版前置提示音。" />
       <VCard t="ElevenLabs STT" d="按住麥克風說話,放開即送出辨識(scribe_v1,最長 15 秒)。" c={GREEN} />
+      <VCard t="GLM TTS" d="念出回答。音色「小陳」、語速 1.3×;以能量偵測裁掉免費版前置提示音。" />
       <VCard t="OpenCC 簡繁" d="端側 s2tw 轉換,把雲端輸出的簡體與用詞修正為台灣正體。" c="#C9B79C" />
     </div>
   </Shell>
@@ -339,8 +347,8 @@ const Cat: Page = () => (
           <li>端側查表推論,與導覽主線解耦</li>
         </ul>
       </div>
-      <div style={{ width: 640 }}>
-        <Placeholder hint="召喚校園貓 + 餵食實機畫面" />
+      <div style={{ width: 460, display: 'flex', justifyContent: 'center' }}>
+        <img src={appCat} style={{ height: '100%', maxHeight: 740, objectFit: 'contain', borderRadius: 24, border: `1px solid ${LINE}` }} />
       </div>
     </div>
   </Shell>
