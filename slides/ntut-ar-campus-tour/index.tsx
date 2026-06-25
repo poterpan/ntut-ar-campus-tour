@@ -19,7 +19,7 @@ import rlStates from './assets/rl-states.png';
 import qloop from './assets/qloop.png';
 
 export const design: DesignSystem = {
-  palette: { bg: '#0E1117', text: '#F4F1EA', accent: '#F5A623' },
+  palette: { bg: '#F6F4EF', text: '#21252F', accent: '#E07B00' },
   fonts: {
     display: '"PingFang TC", "Heiti TC", system-ui, -apple-system, "Segoe UI", sans-serif',
     body: '"PingFang TC", "Heiti TC", system-ui, -apple-system, "Segoe UI", sans-serif',
@@ -29,10 +29,10 @@ export const design: DesignSystem = {
 };
 
 // extra tokens outside the DesignSystem shape
-const GREEN = '#86C795';
-const MUTED = '#9AA3B2';
-const LINE = '#283041';
-const CARD = '#161B26';
+const GREEN = '#4F9A64';
+const MUTED = '#6F7480';
+const LINE = '#E2DACB';
+const CARD = '#FFFFFF';
 const INK = 'var(--osd-bg)';
 const TXT = 'var(--osd-text)';
 const AMBER = 'var(--osd-accent)';
@@ -73,17 +73,16 @@ const Shell = ({ eyebrow, title, children, accent = AMBER }: { eyebrow?: string;
 
 const Figure = ({ src, maxH = 600, white = true }: { src: string; maxH?: number; white?: boolean }) => (
   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-    <img src={src} style={{ maxWidth: '100%', maxHeight: maxH, objectFit: 'contain', borderRadius: 14, ...(white ? { background: '#fff', padding: 20 } : { border: `1px solid ${LINE}` }), boxSizing: 'border-box' }} />
+    <img src={src} style={{ maxWidth: '100%', maxHeight: maxH, objectFit: 'contain', borderRadius: 14, border: `1px solid ${LINE}`, boxShadow: '0 12px 36px rgba(40,40,60,0.10)', ...(white ? { background: '#fff', padding: 20 } : {}), boxSizing: 'border-box' }} />
   </div>
 );
 
 const SectionDivider = ({ num, who, title }: { num: string; who: string; title: string }) => (
   <div style={{ ...fill, background: INK, color: TXT, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 140px', position: 'relative', overflow: 'hidden' }}>
-    <div style={{ position: 'absolute', top: 10, right: 90, fontSize: 360, fontWeight: 900, color: AMBER, opacity: 0.12, lineHeight: 1, fontFamily: DISPLAY }}>{num}</div>
-    <div style={{ width: 96, height: 8, background: AMBER, borderRadius: 4, marginBottom: 36 }} />
-    <div style={{ fontSize: 28, color: MUTED, letterSpacing: '0.28em' }}>{`SECTION ${num}`}</div>
-    <div style={{ fontFamily: DISPLAY, fontSize: 132, fontWeight: 900, lineHeight: 1.05, marginTop: 18 }}>{who}</div>
-    <div style={{ fontSize: 46, color: AMBER, marginTop: 30, fontWeight: 600 }}>{title}</div>
+    <div style={{ position: 'absolute', top: 10, right: 90, fontSize: 360, fontWeight: 900, color: AMBER, opacity: 0.1, lineHeight: 1, fontFamily: DISPLAY }}>{num}</div>
+    <div style={{ width: 96, height: 8, background: AMBER, borderRadius: 4, marginBottom: 34 }} />
+    <div style={{ fontSize: 30, color: AMBER, letterSpacing: '0.16em', fontWeight: 700 }}>{`SECTION ${num}　·　報告人 ${who}`}</div>
+    <div style={{ fontFamily: DISPLAY, fontSize: 78, fontWeight: 900, lineHeight: 1.18, marginTop: 22, maxWidth: 1480 }}>{title}</div>
   </div>
 );
 
@@ -112,7 +111,7 @@ const Poi = ({ n, name, d }: { n: string; name: string; d: string }) => (
 );
 
 const Pill = ({ children, c = GREEN }: { children: any; c?: string }) => (
-  <span style={{ display: 'inline-block', background: 'rgba(134,199,149,0.12)', border: `1px solid ${c}`, color: c, borderRadius: 999, padding: '8px 22px', fontSize: 26, marginRight: 14 }}>{children}</span>
+  <span style={{ display: 'inline-block', background: 'rgba(0,0,0,0.035)', border: `1px solid ${c}`, color: c, borderRadius: 999, padding: '8px 22px', fontSize: 26, marginRight: 14 }}>{children}</span>
 );
 
 const VCard = ({ t, d, c = AMBER }: { t: string; d: string; c?: string }) => (
@@ -248,7 +247,7 @@ const NpcMaking: Page = () => (
           <div style={{ fontSize: 27, color: MUTED, marginTop: 12, lineHeight: 1.6 }}>綁骨後手臂網格被拉扯沾黏到大腿 → 改餵<span style={{ color: GREEN, fontWeight: 700 }}> T-pose 參考圖</span>,蒙皮權重才正確分離,才有流暢動畫。</div>
         </div>
       </div>
-      <div style={{ width: 540, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0c11', borderRadius: 18, border: `1px solid ${LINE}` }}>
+      <div style={{ width: 540, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#15181f', borderRadius: 18, border: `1px solid ${LINE}` }}>
         <img src={npcRig} style={{ maxHeight: 600, maxWidth: '100%', objectFit: 'contain', borderRadius: 12 }} />
       </div>
     </div>
@@ -400,7 +399,7 @@ const Results: Page = () => (
 const Conclusion: Page = () => (
   <Shell eyebrow="CONCLUSION — 結論與未來" title="結論與未來展望">
     <div style={{ display: 'flex', gap: 40, height: '100%' }}>
-      <div style={{ flex: 1, background: 'rgba(245,166,35,0.08)', border: `1px solid ${AMBER}`, borderRadius: 18, padding: '34px 36px' }}>
+      <div style={{ flex: 1, background: 'rgba(224,123,0,0.07)', border: `1px solid ${AMBER}`, borderRadius: 18, padding: '34px 36px' }}>
         <div style={{ fontSize: 32, fontWeight: 800, color: AMBER }}>目前痛點:即時性</div>
         <div style={{ fontSize: 29, color: TXT, marginTop: 18, lineHeight: 1.65 }}>對話走 <b>STT → LLM → TTS</b> 三段雲端串接,延遲累積;尤其 LLM 整段回完才送 TTS,Demo 可見停頓。</div>
         <div style={{ fontSize: 26, color: MUTED, marginTop: 18, lineHeight: 1.6 }}>優化:串流式 TTS、首句先回、邊收邊播、減少串接段數。</div>
