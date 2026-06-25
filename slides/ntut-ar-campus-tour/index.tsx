@@ -81,8 +81,9 @@ const SectionDivider = ({ num, who, title }: { num: string; who: string; title: 
   <div style={{ ...fill, background: INK, color: TXT, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 140px', position: 'relative', overflow: 'hidden' }}>
     <div style={{ position: 'absolute', top: 10, right: 90, fontSize: 360, fontWeight: 900, color: AMBER, opacity: 0.1, lineHeight: 1, fontFamily: DISPLAY }}>{num}</div>
     <div style={{ width: 96, height: 8, background: AMBER, borderRadius: 4, marginBottom: 34 }} />
-    <div style={{ fontSize: 30, color: AMBER, letterSpacing: '0.16em', fontWeight: 700 }}>{`SECTION ${num}　·　報告人 ${who}`}</div>
-    <div style={{ fontFamily: DISPLAY, fontSize: 78, fontWeight: 900, lineHeight: 1.18, marginTop: 22, maxWidth: 1480 }}>{title}</div>
+    <div style={{ fontSize: 30, color: AMBER, letterSpacing: '0.2em', fontWeight: 700 }}>{`SECTION ${num}`}</div>
+    <div style={{ fontFamily: DISPLAY, fontSize: 76, fontWeight: 900, lineHeight: 1.18, marginTop: 20, maxWidth: 1480 }}>{title}</div>
+    <div style={{ fontSize: 40, color: MUTED, marginTop: 26 }}>報告人　<span style={{ color: TXT, fontWeight: 700 }}>{who}</span></div>
   </div>
 );
 
