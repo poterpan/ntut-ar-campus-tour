@@ -24,8 +24,9 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
-    XPreformatted, HRFlowable, Image
+    XPreformatted, HRFlowable, Image, PageBreak
 )
+from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase.cidfonts import UnicodeCIDFont
@@ -135,8 +136,8 @@ def build_code(code_lines):
     return XPreformatted(code_text, styles['code'])
 
 
-def build_image(path, alt, base_dir):
-    """Embed an image scaled to page width, with an optional centered caption."""
+def build_image(path, alt, base_dir, width_mm=None):
+    """Embed an image. Default scales to page width; width_mm pins a smaller size."""
     full = path if os.path.isabs(path) else os.path.join(base_dir, path)
     if not os.path.isfile(full):
         return [Paragraph('<i>[image missing: %s]</i>' % path, styles['caption'])]
@@ -148,9 +149,13 @@ def build_image(path, alt, base_dir):
         w, h = ImageReader(full).getSize()
     max_w = A4[0] - 40 * mm
     max_h = 135 * mm
-    tw, th = max_w, max_w * h / w
-    if th > max_h:
-        th, tw = max_h, max_h * w / h
+    if width_mm:
+        tw = width_mm * mm
+        th = tw * h / w
+    else:
+        tw, th = max_w, max_w * h / w
+        if th > max_h:
+            th, tw = max_h, max_h * w / h
     img = Image(full, width=tw, height=th)
     img.hAlign = 'CENTER'
     out = [Spacer(1, 4), img]
@@ -204,6 +209,32 @@ def build_table(rows):
     return table
 
 
+def make_toc():
+    """A clickable Table of Contents flowable (chapters / H1 only)."""
+    toc = TableOfContents()
+    toc.levelStyles = [ParagraphStyle(
+        'TOCH1', fontName=BOLD, fontSize=11.5, leading=24, textColor=H1_COLOR,
+        leftIndent=16, firstLineIndent=-16, spaceAfter=2)]
+    return toc
+
+
+class ReportDoc(SimpleDocTemplate):
+    """Adds PDF bookmarks + notifies the TOC for every H1 chapter heading."""
+    def beforeDocument(self):
+        self._sec = 0  # reset per build pass so TOC keys are stable → multiBuild converges
+
+    def afterFlowable(self, flowable):
+        if flowable.__class__.__name__ == 'Paragraph':
+            st = getattr(flowable, 'style', None)
+            if st is not None and st.name == 'H1':
+                txt = flowable.getPlainText()
+                self._sec = getattr(self, '_sec', 0) + 1
+                key = 'sec%d' % self._sec
+                self.canv.bookmarkPage(key)
+                self.canv.addOutlineEntry(txt, key, level=0, closed=False)
+                self.notify('TOCEntry', (0, txt, self.page, key))
+
+
 _INFO_PREFIXES = ('**課程**', '**組員**', '**日期**', '**Course**', '**Team**', '**Date**')
 
 
@@ -218,6 +249,15 @@ def parse_markdown(md_text, base_dir='.'):
         line = lines[i]
         stripped = line.strip()
         if not stripped:
+            i += 1
+            continue
+
+        if stripped == '<!-- pagebreak -->':
+            story.append(PageBreak())
+            i += 1
+            continue
+        if stripped == '[TOC]':
+            story.append(make_toc())
             i += 1
             continue
 
@@ -266,9 +306,10 @@ def parse_markdown(md_text, base_dir='.'):
             i += 1
             continue
 
-        img_m = re.match(r'^!\[([^\]]*)\]\(([^)]+)\)\s*$', stripped)
+        img_m = re.match(r'^!\[([^\]]*)\]\(([^)]+)\)(?:\{w=(\d+)\})?\s*$', stripped)
         if img_m:
-            for fl in build_image(img_m.group(2), img_m.group(1), base_dir):
+            wmm = int(img_m.group(3)) if img_m.group(3) else None
+            for fl in build_image(img_m.group(2), img_m.group(1), base_dir, wmm):
                 story.append(fl)
             i += 1
             continue
@@ -331,13 +372,14 @@ def main():
     title = sys.argv[3] if len(sys.argv) > 3 else 'NTUT AR Campus Tour — Final Report'
     with open(md_path, 'r', encoding='utf-8') as f:
         md_text = f.read()
-    doc = SimpleDocTemplate(
+    doc = ReportDoc(
         pdf_path, pagesize=A4,
         topMargin=25 * mm, bottomMargin=20 * mm,
         leftMargin=20 * mm, rightMargin=20 * mm,
         title=title, author='NTUT Group 4',
     )
-    doc.build(parse_markdown(md_text, base_dir=os.path.dirname(os.path.abspath(md_path))))
+    story = parse_markdown(md_text, base_dir=os.path.dirname(os.path.abspath(md_path)))
+    doc.multiBuild(story)
     print(f'PDF generated: {pdf_path}  ({os.path.getsize(pdf_path)//1024} KB)')
 
 

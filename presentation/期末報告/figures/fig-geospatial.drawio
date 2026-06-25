@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="drawio" version="26.0.0">
+  <diagram name="geospatial">
+    <mxGraphModel dx="900" dy="600" grid="0" gridSize="10" pageWidth="960" pageHeight="420" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="gps" value="GPS / 行動網路（粗略座標,誤差數公尺）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#1a2e4a;fontSize=12;" vertex="1" parent="1"><mxGeometry x="40" y="40" width="240" height="60" as="geometry" /></mxCell>
+        <mxCell id="vps" value="VPS 視覺定位（比對 Google 街景特徵點雲）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#5a3a00;fontSize=12;" vertex="1" parent="1"><mxGeometry x="40" y="180" width="240" height="64" as="geometry" /></mxCell>
+        <mxCell id="imu" value="裝置 IMU / SLAM（連續姿態追蹤）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#1a2e4a;fontSize=12;" vertex="1" parent="1"><mxGeometry x="40" y="324" width="240" height="60" as="geometry" /></mxCell>
+        <mxCell id="fuse" value="ARCore Geospatial 融合" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=12;" vertex="1" parent="1"><mxGeometry x="420" y="178" width="180" height="68" as="geometry" /></mxCell>
+        <mxCell id="out" value="高精度全球姿態（校內 &lt;1m、方位 &lt;1°）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#274722;fontSize=12;" vertex="1" parent="1"><mxGeometry x="720" y="178" width="200" height="68" as="geometry" /></mxCell>
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=classic;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" source="gps" target="fuse"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=classic;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="vps" target="fuse"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=classic;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" edge="1" parent="1" source="imu" target="fuse"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=classic;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="fuse" target="out"><mxGeometry relative="1" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
