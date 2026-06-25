@@ -232,7 +232,7 @@ ARCore Geospatial API 透過三項資料源融合定位:
 - **回答風格**:先直接回答、不照抄整段資料、最多列 6 點、純文字 3–6 句。
 - 帶入 `CURRENT_POI_ID / NAME / CONTEXT`,讓每個地標都有專屬的知識上下文。
 
-### 3.3.3 降級與重試
+### 3.3.3 重試與容錯
 
 `LlmRetryPolicy`(純函式、可測試)定義:
 
@@ -240,7 +240,7 @@ ARCore Geospatial API 透過三項資料源融合定位:
 - **不重試**:4xx 客戶端錯誤。
 - **退避**:指數退避 1s → 2s → 4s(上限 8s),最多重試 2 次。
 
-任一環節失敗時,導遊以友善訊息降級:「抱歉,我現在連不上,稍後再試。」
+任一環節失敗時,導遊改以一句友善訊息回覆:「抱歉,我現在連不上,稍後再試。」
 
 ### 3.3.4 語音 pipeline(TTS / STT / 簡繁)
 
@@ -269,7 +269,7 @@ ARCore Geospatial API 透過三項資料源融合定位:
 3. `TWVariants`:轉台灣慣用字形(裏→裡、着→著)。
 4. 載入失敗時靜默退回原文(graceful degrade)。
 
-![對話 + 語音 pipeline:STT → 簡繁轉換 → LLM →（文字先上）→ TTS → 播放,含重試 / 降級](figures/fig-pipeline.png)
+![對話 + 語音 pipeline:STT → 簡繁轉換 → LLM →（文字先上）→ TTS → 播放,含重試 / 容錯](figures/fig-pipeline.png)
 
 ---
 
@@ -426,7 +426,7 @@ PlayerPrefs.SetInt("HasDisplayedGeospatialPrivacyPrompt", 1);
 |---|---|
 | 症狀 | 雲端 LLM 在連續提問時偶發 429(限流),或遇到逾時 / 連線中斷,造成導遊無回應或卡住,單點失敗就中斷整段對話體驗。 |
 | 成因 | LLM 為外部雲端服務,存在速率限制與網路不穩定;若不處理,任一次請求失敗便會讓對話中斷。 |
-| 解法 | 以 `LlmRetryPolicy`(純函式、可測試)對可重試錯誤(429 / 408 / 5xx / 連線錯誤)做**指數退避重試**(1s→2s→4s,上限 8s,最多 2 次);仍失敗則以友善訊息**降級**:「抱歉,我現在連不上,稍後再試。」確保單點失敗不會讓 App 卡死,提升整體穩定性。 |
+| 解法 | 以 `LlmRetryPolicy`(純函式、可測試)對可重試錯誤(429 / 408 / 5xx / 連線錯誤)做**指數退避重試**(1s→2s→4s,上限 8s,最多 2 次);仍失敗則**改以一句友善訊息回覆**:「抱歉,我現在連不上,稍後再試。」確保單點失敗不會讓 App 卡死,提升整體穩定性。 |
 
 ## 6.4 簡繁與台灣用詞歧義
 
@@ -476,7 +476,7 @@ PlayerPrefs.SetInt("HasDisplayedGeospatialPrivacyPrompt", 1);
 
 1. **AR 定位導覽**:ARCore Geospatial 達公尺以下精度,POI anchor + 30 m 接近觸發,走近即現身。
 2. **虛擬導遊 NPC**:Jenson 角色 + 四動畫狀態機,持續面向使用者,走近 POI 自動解說。
-3. **LLM 即時對話與語音**:每棟建築專屬知識 prompt,文字/語音雙向互動,具降級重試與簡繁修正。
+3. **LLM 即時對話與語音**:每棟建築專屬知識 prompt,文字/語音雙向互動,具重試容錯與簡繁修正。
 4. **AR 校園貓**:tabular Q-Learning(1300 episodes)訓練的 NPC,Pokémon Go 式召喚餵食彩蛋。
 
 工程上建立了 iOS / Android **雙平台自動化 CI/CD**、安全的金鑰注入流程與模組化架構。專案歷時約 4 週、約 47 個 commit,從提案到雙平台部署完整落地。

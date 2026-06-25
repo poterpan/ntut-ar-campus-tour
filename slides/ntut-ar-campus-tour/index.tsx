@@ -317,7 +317,7 @@ const DialogueFlow: Page = () => (
       <ul style={{ ...bullet, marginTop: 48 }}>
         <li>文字先顯示 → 語音隨後合成播放</li>
         <li>429 / 逾時 / 5xx → 退避重試(≤2 次)</li>
-        <li>仍失敗 → 友善降級訊息,App 不卡死</li>
+        <li>仍失敗 → 改回友善提示訊息,App 不卡死</li>
       </ul>
     </div>
     <div style={{ width: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
