@@ -260,6 +260,18 @@ class ReportDoc(SimpleDocTemplate):
                 self.notify('TOCEntry', (0, txt, self.page, key))
 
 
+def _draw_page_number(canvas, doc):
+    """頁腳頁碼:封面(第 1 頁)不放,其餘置中。採 canvas 實際頁次,與可點目錄的頁碼一致。"""
+    page = canvas.getPageNumber()
+    if page <= 1:
+        return
+    canvas.saveState()
+    canvas.setFont(BASE, 9)
+    canvas.setFillColor(HexColor('#888888'))
+    canvas.drawCentredString(A4[0] / 2.0, 11 * mm, str(page))
+    canvas.restoreState()
+
+
 _INFO_PREFIXES = ('**課程**', '**組員**', '**日期**', '**Course**', '**Team**', '**Date**')
 
 
@@ -406,7 +418,7 @@ def main():
         title=title, author='NTUT Group 4',
     )
     story = parse_markdown(md_text, base_dir=os.path.dirname(os.path.abspath(md_path)))
-    doc.multiBuild(story)
+    doc.multiBuild(story, onFirstPage=_draw_page_number, onLaterPages=_draw_page_number)
     print(f'PDF generated: {pdf_path}  ({os.path.getsize(pdf_path)//1024} KB)')
 
 
