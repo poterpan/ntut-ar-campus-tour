@@ -180,7 +180,7 @@ const Site: Page = () => (
 
 const Architecture: Page = () => (
   <Shell eyebrow="ARCHITECTURE — 系統架構" title="三層架構:手機端 / 雲端 / 訓練端">
-    <Figure src={architecture} maxH={600} />
+    <Figure src={architecture} maxH={740} />
   </Shell>
 );
 
@@ -197,7 +197,7 @@ const ARPositioning: Page = () => (
 
 const Proximity: Page = () => (
   <Shell eyebrow="功能① AR 定位" title="POI 錨定與「走到就現身」">
-    <Figure src={proximity} maxH={600} />
+    <Figure src={proximity} maxH={740} />
   </Shell>
 );
 
