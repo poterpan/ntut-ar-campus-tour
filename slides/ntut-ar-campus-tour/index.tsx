@@ -205,9 +205,9 @@ const Engineering: Page = () => (
   <Shell eyebrow="ENGINEERING — 工程整合" title="雙平台 CI/CD 自動化建置">
     <div style={{ display: 'flex', gap: 40, height: '100%' }}>
       <div style={{ flex: 1.2 }}><Figure src={cicd} maxH={560} /></div>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 20, justifyContent: 'center' }}>
-        <img src={ci} style={{ width: '100%', borderRadius: 12, border: `1px solid ${LINE}` }} />
-        <img src={testflight} style={{ width: '100%', maxHeight: 300, objectFit: 'cover', objectPosition: 'top', borderRadius: 12, border: `1px solid ${LINE}` }} />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 24, justifyContent: 'center', alignItems: 'center', minWidth: 0 }}>
+        <img src={ci} style={{ maxWidth: '100%', maxHeight: 340, objectFit: 'contain', borderRadius: 12, border: `1px solid ${LINE}` }} />
+        <img src={testflight} style={{ maxWidth: '100%', maxHeight: 340, objectFit: 'contain', borderRadius: 12, border: `1px solid ${LINE}` }} />
       </div>
     </div>
   </Shell>
