@@ -1,0 +1,91 @@
+<mxfile>
+  <diagram id="autolayout" name="Page-1">
+    <mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="invoice" value="按住麥克風說話（錄音）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#1a2e4a;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="10" y="0" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="stt" value="ElevenLabs STT 辨識" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#5a3a00;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="10" y="90" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="opencc" value="OpenCC 簡繁轉台灣正體" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#274722;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="0" y="170" width="190" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="intext" value="文字輸入" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#1a2e4a;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="210" y="170" width="110" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="prompt" value="組該 POI 專屬 prompt（LlmPromptBuilder）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf2ff;strokeColor=#6c8ebf;fontColor=#1a2e4a;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="60" y="260" width="230" height="54" as="geometry"/>
+        </mxCell>
+        <mxCell id="llm" value="LLM 推論（gpt-5.5）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#3d2a4a;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="90" y="350" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dec" value="回傳成功?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#5a4a00;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="160" y="430" width="140" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="retry" value="LlmRetryPolicy 指數退避重試（≤2 次）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#5a4a00;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="20" y="550" width="220" height="54" as="geometry"/>
+        </mxCell>
+        <mxCell id="degrade" value="友善降級訊息" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="70" y="640" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="text" value="文字先顯示於對話框" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf2ff;strokeColor=#6c8ebf;fontColor=#1a2e4a;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="110" y="730" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="tts" value="GLM TTS 合成語音（小陳）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#274722;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="100" y="810" width="190" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="trim" value="WavUtil 裁掉提示音" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#274722;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="110" y="900" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="play" value="播放語音 + NPC 說話動畫" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#1a2e4a;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="100" y="980" width="200" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="e0" value="" style="html=1;rounded=0;" edge="1" parent="1" source="invoice" target="stt">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="100" y="50"/><mxPoint x="100" y="70"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e1" value="" style="html=1;rounded=0;" edge="1" parent="1" source="stt" target="opencc">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="100" y="140"/><mxPoint x="100" y="160"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e2" value="" style="html=1;rounded=0;" edge="1" parent="1" source="opencc" target="prompt">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="130" y="220"/><mxPoint x="130" y="250"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e3" value="" style="html=1;rounded=0;" edge="1" parent="1" source="intext" target="prompt">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="250" y="220"/><mxPoint x="250" y="250"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e4" value="" style="html=1;rounded=0;" edge="1" parent="1" source="prompt" target="llm">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="180" y="310"/><mxPoint x="180" y="340"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e5" value="" style="html=1;rounded=0;" edge="1" parent="1" source="llm" target="dec">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="210" y="400"/><mxPoint x="210" y="420"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e6" value="是" style="html=1;rounded=0;" edge="1" parent="1" source="dec" target="text">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="260" y="510"/><mxPoint x="260" y="710"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e7" value="否（429/逾時/5xx）" style="html=1;rounded=0;" edge="1" parent="1" source="dec" target="retry">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="200" y="510"/><mxPoint x="200" y="540"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e8" value="重試" style="html=1;rounded=0;" edge="1" parent="1" source="retry" target="llm">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="130" y="550"/><mxPoint x="130" y="410"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e9" value="仍失敗" style="html=1;rounded=0;" edge="1" parent="1" source="retry" target="degrade">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="150" y="600"/><mxPoint x="150" y="630"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e10" value="" style="html=1;rounded=0;" edge="1" parent="1" source="degrade" target="text">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="170" y="690"/><mxPoint x="170" y="710"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e11" value="" style="html=1;rounded=0;" edge="1" parent="1" source="text" target="tts">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="200" y="780"/><mxPoint x="200" y="800"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e12" value="" style="html=1;rounded=0;" edge="1" parent="1" source="tts" target="trim">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="200" y="860"/><mxPoint x="200" y="890"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e13" value="" style="html=1;rounded=0;" edge="1" parent="1" source="trim" target="play">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="200" y="950"/><mxPoint x="200" y="970"/></Array></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

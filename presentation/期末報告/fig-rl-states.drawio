@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="drawio" version="26.0.0">
+  <diagram name="rl-states">
+    <mxGraphModel dx="900" dy="600" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="820" pageHeight="660" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="r4" value="" style="ellipse;html=1;fillColor=#fbfbfd;strokeColor=#aab0b6;" vertex="1" parent="1">
+          <mxGeometry x="70" y="60" width="540" height="540" as="geometry" />
+        </mxCell>
+        <mxCell id="r3" value="" style="ellipse;html=1;fillColor=#eef3fb;strokeColor=#aab0b6;" vertex="1" parent="1">
+          <mxGeometry x="140" y="130" width="400" height="400" as="geometry" />
+        </mxCell>
+        <mxCell id="r2" value="" style="ellipse;html=1;fillColor=#e3ecf9;strokeColor=#aab0b6;" vertex="1" parent="1">
+          <mxGeometry x="210" y="200" width="260" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="r1" value="" style="ellipse;html=1;fillColor=#d6e4f7;strokeColor=#aab0b6;" vertex="1" parent="1">
+          <mxGeometry x="280" y="270" width="120" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s0" style="endArrow=none;html=1;strokeColor=#b8bdc2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="340" y="330" as="sourcePoint" /><mxPoint x="610" y="330" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="s1" style="endArrow=none;html=1;strokeColor=#b8bdc2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="340" y="330" as="sourcePoint" /><mxPoint x="531" y="521" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="s2" style="endArrow=none;html=1;strokeColor=#b8bdc2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="340" y="330" as="sourcePoint" /><mxPoint x="340" y="600" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="s3" style="endArrow=none;html=1;strokeColor=#b8bdc2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="340" y="330" as="sourcePoint" /><mxPoint x="149" y="521" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="s4" style="endArrow=none;html=1;strokeColor=#b8bdc2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="340" y="330" as="sourcePoint" /><mxPoint x="70" y="330" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="s5" style="endArrow=none;html=1;strokeColor=#b8bdc2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="340" y="330" as="sourcePoint" /><mxPoint x="149" y="139" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="s6" style="endArrow=none;html=1;strokeColor=#b8bdc2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="340" y="330" as="sourcePoint" /><mxPoint x="340" y="60" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="s7" style="endArrow=none;html=1;strokeColor=#b8bdc2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="340" y="330" as="sourcePoint" /><mxPoint x="531" y="139" as="targetPoint" /></mxGeometry></mxCell>
+
+        <mxCell id="cat" value="貓" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#1a2e4a;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="312" y="302" width="56" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="fwd" value="↑ 貓朝前（0° 基準）" style="text;html=1;align=center;fontSize=11;fontColor=#444444;" vertex="1" parent="1">
+          <mxGeometry x="250" y="34" width="180" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="can" value="目標罐頭" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#5a3a00;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="402" y="208" width="86" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ang" value="45°" style="text;html=1;align=center;fontSize=11;fontColor=#777777;" vertex="1" parent="1">
+          <mxGeometry x="392" y="150" width="40" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="title" value="RL 狀態離散化（以貓為中心的相對位置）" style="text;html=1;align=center;fontSize=13;fontStyle=1;fontColor=#16213e;" vertex="1" parent="1">
+          <mxGeometry x="150" y="8" width="400" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="leg1" value="距離環（內→外）：&#xa;① &lt; 2m&#xa;② 2–4.5m&#xa;③ 4.5–7m&#xa;④ ≥ 7m" style="text;html=1;align=left;verticalAlign=top;fontSize=12;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="630" y="170" width="170" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="leg2" value="角度：8 個 45° 扇形" style="text;html=1;align=left;fontSize=12;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="630" y="300" width="170" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="bottom" value="→ 4 距離 × 8 角度 = 32 個離散狀態" style="text;html=1;align=center;fontSize=13;fontStyle=1;fontColor=#16213e;" vertex="1" parent="1">
+          <mxGeometry x="150" y="612" width="400" height="26" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

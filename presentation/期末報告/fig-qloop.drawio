@@ -1,0 +1,40 @@
+<mxfile>
+  <diagram id="autolayout" name="Page-1">
+    <mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="obs" value="觀察狀態（距離 × 角度 → 32 離散態）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf2ff;strokeColor=#6c8ebf;fontColor=#1a2e4a;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="0" y="30" width="210" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="act" value="ε-greedy 選動作（直走 / 左轉 / 右轉）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#1a2e4a;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="250" y="0" width="210" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="exec" value="執行:移動 / 轉向" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#1a2e4a;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="490" y="0" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="rew" value="計算 reward（距離 shaping + 對齊 + 吃到 / 出界）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#5a4a00;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="680" y="0" width="230" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="upd" value="更新 Q(s,a)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#274722;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="940" y="30" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="e0" value="" style="html=1;rounded=0;" edge="1" parent="1" source="obs" target="act">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="210" y="40"/><mxPoint x="230" y="40"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e1" value="" style="html=1;rounded=0;" edge="1" parent="1" source="act" target="exec">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="460" y="30"/><mxPoint x="480" y="30"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e2" value="" style="html=1;rounded=0;" edge="1" parent="1" source="exec" target="rew">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="640" y="30"/><mxPoint x="670" y="30"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e3" value="" style="html=1;rounded=0;" edge="1" parent="1" source="rew" target="upd">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="910" y="40"/><mxPoint x="930" y="40"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="e4" value="下一步" style="html=1;rounded=0;" edge="1" parent="1" source="upd" target="obs">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="940" y="70"/><mxPoint x="220" y="70"/></Array></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
